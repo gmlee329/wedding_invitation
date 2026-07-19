@@ -83,3 +83,24 @@ test('countdownParts uses the Korea calendar date after the wedding time', () =>
   assert.equal(utils.countdownParts(target, Date.parse('2026-10-24T18:00:00+09:00')).state, 'today');
   assert.equal(utils.countdownParts(target, Date.parse('2026-10-25T00:00:00+09:00')).state, 'after');
 });
+
+test('app provides every safe section renderer', () => {
+  const html = source();
+  const app = scriptById(html, 'wedding-app');
+  const keys = ['hero', 'invitation', 'couple', 'schedule', 'story', 'gallery', 'location', 'transportation', 'notices', 'accounts', 'share', 'outro'];
+  for (const key of keys) assert.match(app, new RegExp(`\\b${key}\\s*:`));
+  assert.equal((html.match(/<main id="invitation-app"/g) || []).length, 1);
+  assert.doesNotMatch(html, /\sstyle=/i);
+  assert.match(app, /textContent/);
+  assert.match(app, /createElement/);
+  assert.match(app, /DocumentFragment/);
+});
+
+test('renderers provide a complete accessible document and media outline', () => {
+  const app = scriptById(source(), 'wedding-app');
+  assert.match(app, /sectionShell\('hero',[\s\S]*?'h1'\)/);
+  assert.match(app, /함께해 주셔서 감사합니다/);
+  assert.match(app, /addEventListener\('load',[\s\S]*?placeholder\.remove\(\)/);
+  assert.match(app, /setAttribute\('scope', 'col'\)/);
+  assert.match(app, /일요일/);
+});

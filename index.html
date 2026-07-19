@@ -24,9 +24,795 @@
       sharing: { title: '김민준 ♥ 이서연 결혼식에 초대합니다', text: '2026년 10월 24일, 두 사람의 새로운 시작을 함께 축복해 주세요.' },
     });
   </script>
-  <style></style>
+  <style>
+    :root {
+      --page-width: 460px;
+      --paper: #f2efe8;
+      --ink: #20211d;
+      --muted: #77766f;
+      --sage: #798071;
+      --bronze: #9a765a;
+      --line: color-mix(in srgb, var(--ink) 16%, transparent);
+      --serif: Georgia, 'Times New Roman', 'Noto Serif KR', serif;
+      --sans: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      color-scheme: light;
+      background: #d8d3c8;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      overflow-x: hidden;
+      color: var(--ink);
+      background: #d8d3c8;
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.75;
+      text-rendering: optimizeLegibility;
+      word-break: keep-all;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button,
+    .button,
+    .nav-link {
+      min-height: 44px;
+    }
+
+    button {
+      color: inherit;
+      font: inherit;
+    }
+
+    a {
+      color: inherit;
+      text-underline-offset: 0.22em;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0 0 0 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--bronze);
+      outline-offset: 4px;
+    }
+
+    .invitation-page {
+      position: relative;
+      width: 100%;
+      max-width: var(--page-width);
+      margin: 0 auto;
+      overflow: hidden;
+      background-color: var(--paper);
+      background-image:
+        radial-gradient(circle at 12% 18%, rgb(255 255 255 / 44%) 0 0.8px, transparent 1px),
+        radial-gradient(circle at 82% 64%, rgb(32 33 29 / 6%) 0 0.7px, transparent 1px),
+        linear-gradient(115deg, rgb(255 255 255 / 12%), transparent 44%, rgb(154 118 90 / 4%));
+      background-size: 13px 17px, 19px 23px, 100% 100%;
+      isolation: isolate;
+    }
+
+    .invitation-page:focus {
+      outline: none;
+    }
+
+    .invitation-section {
+      position: relative;
+      padding: clamp(72px, 20vw, 112px) clamp(24px, 8vw, 44px);
+    }
+
+    .invitation-section + .invitation-section::before {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 36px;
+      height: 1px;
+      background: var(--line);
+      content: '';
+      transform: translateX(-50%);
+    }
+
+    .section-header {
+      margin-bottom: 42px;
+      text-align: center;
+    }
+
+    .section-eyebrow,
+    .card-eyebrow,
+    .story-year {
+      margin: 0 0 12px;
+      color: var(--bronze);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      line-height: 1.4;
+      text-transform: uppercase;
+    }
+
+    .section-title {
+      max-width: 13em;
+      margin: 0 auto;
+      font-family: var(--serif);
+      font-size: clamp(1.85rem, 8vw, 2.75rem);
+      font-weight: 400;
+      letter-spacing: -0.045em;
+      line-height: 1.22;
+      white-space: pre-line;
+    }
+
+    .section-copy {
+      margin: 0;
+      color: var(--muted);
+      text-align: center;
+      white-space: pre-line;
+    }
+
+    .hero-section {
+      display: flex;
+      min-height: 100svh;
+      padding: 72px 20px;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .hero-section::before {
+      display: none;
+    }
+
+    .hero-section .section-header {
+      position: relative;
+      z-index: 2;
+      margin: 0 0 -48px;
+      padding: 30px 14px 0;
+      text-align: left;
+    }
+
+    .hero-section .section-title {
+      max-width: 7em;
+      margin: 0;
+      font-size: clamp(3.1rem, 16vw, 5.1rem);
+      letter-spacing: -0.065em;
+      line-height: 0.88;
+    }
+
+    .hero-section .section-eyebrow {
+      color: var(--sage);
+    }
+
+    .hero-media {
+      width: calc(100% - 34px);
+      margin-left: auto;
+      aspect-ratio: 3 / 4.15;
+    }
+
+    .hero-footer {
+      display: grid;
+      margin-top: 22px;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      gap: 20px;
+    }
+
+    .hero-names {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      letter-spacing: -0.03em;
+    }
+
+    .hero-date {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-align: right;
+    }
+
+    .media-frame {
+      position: relative;
+      margin: 0;
+      overflow: hidden;
+      background: linear-gradient(145deg, #dcd7cd, #c9c2b5 48%, #e5e0d7);
+    }
+
+    .media-frame img {
+      position: absolute;
+      z-index: 1;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .media-placeholder {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      padding: 18px;
+      place-items: center;
+      color: rgb(32 33 29 / 62%);
+      background:
+        radial-gradient(circle at 32% 28%, rgb(255 255 255 / 48%), transparent 24%),
+        linear-gradient(135deg, rgb(121 128 113 / 18%), transparent 52%),
+        linear-gradient(30deg, #e3ded4, #cbc5ba);
+      font-family: var(--serif);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .invitation-lines {
+      display: grid;
+      margin: 0;
+      gap: 5px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .invitation-lines p {
+      min-height: 1em;
+      margin: 0;
+    }
+
+    .family-line {
+      margin: 42px 0 0;
+      font-family: var(--serif);
+      font-size: 1.02rem;
+      line-height: 2;
+      text-align: center;
+    }
+
+    .couple-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .person-card {
+      display: grid;
+      min-height: 236px;
+      padding: 30px 24px;
+      border: 1px solid var(--line);
+      align-content: space-between;
+      background: rgb(255 255 255 / 16%);
+    }
+
+    .person-role {
+      margin: 0;
+      color: var(--sage);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+    }
+
+    .person-name {
+      margin: 8px 0 0;
+      font-family: var(--serif);
+      font-size: 2rem;
+      font-weight: 400;
+    }
+
+    .person-english {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+    }
+
+    .contact-button,
+    .share-button,
+    .copy-button,
+    .nav-link {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      cursor: pointer;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+    }
+
+    .contact-button {
+      width: 100%;
+      margin-top: 26px;
+    }
+
+    .schedule-summary {
+      margin-bottom: 34px;
+      text-align: center;
+    }
+
+    .schedule-date {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: 1.3rem;
+      letter-spacing: 0.02em;
+    }
+
+    .schedule-meta {
+      margin: 4px 0 0;
+      color: var(--muted);
+    }
+
+    .calendar {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      text-align: center;
+    }
+
+    .calendar caption {
+      margin-bottom: 18px;
+      font-family: var(--serif);
+      font-size: 1.05rem;
+    }
+
+    .calendar th {
+      height: 34px;
+      color: var(--muted);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+    }
+
+    .calendar abbr {
+      text-decoration: none;
+    }
+
+    .calendar td {
+      height: 42px;
+      font-family: var(--serif);
+      font-size: 0.86rem;
+    }
+
+    .calendar [aria-current='date'] span {
+      display: inline-grid;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      place-items: center;
+      color: var(--paper);
+      background: var(--sage);
+    }
+
+    .countdown {
+      display: grid;
+      margin-top: 38px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+    }
+
+    .countdown-item {
+      padding: 14px 3px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      text-align: center;
+    }
+
+    .countdown-value {
+      display: block;
+      font-family: var(--serif);
+      font-size: 1.45rem;
+      line-height: 1.2;
+    }
+
+    .countdown-label {
+      color: var(--muted);
+      font-size: 0.55rem;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+    }
+
+    .countdown-message {
+      margin: 18px 0 0;
+      color: var(--sage);
+      font-family: var(--serif);
+      text-align: center;
+    }
+
+    .story-list {
+      position: relative;
+      display: grid;
+      gap: 40px;
+    }
+
+    .story-list::before {
+      position: absolute;
+      top: 8px;
+      bottom: 8px;
+      left: 13px;
+      width: 1px;
+      background: var(--line);
+      content: '';
+    }
+
+    .story-item {
+      position: relative;
+      padding-left: 48px;
+    }
+
+    .story-item::before {
+      position: absolute;
+      top: 6px;
+      left: 9px;
+      width: 9px;
+      height: 9px;
+      border: 2px solid var(--paper);
+      border-radius: 50%;
+      background: var(--bronze);
+      box-shadow: 0 0 0 1px var(--bronze);
+      content: '';
+    }
+
+    .story-title,
+    .notice-title,
+    .transport-title {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: 1.18rem;
+      font-weight: 400;
+    }
+
+    .story-label,
+    .story-body,
+    .notice-body,
+    .transport-lines {
+      margin: 5px 0 0;
+      color: var(--muted);
+    }
+
+    .story-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .gallery-button {
+      position: relative;
+      min-width: 0;
+      padding: 0;
+      border: 0;
+      grid-column: span 7;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .gallery-button:nth-child(4n + 2),
+    .gallery-button:nth-child(4n + 3) {
+      grid-column: span 5;
+    }
+
+    .gallery-button:nth-child(4n + 4) {
+      grid-column: 5 / span 8;
+    }
+
+    .gallery-button .media-frame {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+    }
+
+    .gallery-button:nth-child(3n + 2) .media-frame {
+      aspect-ratio: 3 / 4.45;
+    }
+
+    .location-address {
+      margin: 0;
+      text-align: center;
+    }
+
+    .location-hall {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+    }
+
+    .venue-phone {
+      display: flex;
+      width: fit-content;
+      min-height: 44px;
+      margin: 10px auto 30px;
+      align-items: center;
+      font-size: 0.78rem;
+    }
+
+    .map-media {
+      aspect-ratio: 4 / 3;
+    }
+
+    .navigation-links {
+      display: grid;
+      margin-top: 12px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .nav-link {
+      padding: 8px 4px;
+      letter-spacing: 0;
+    }
+
+    .transport-list,
+    .notice-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .transport-item,
+    .notice-card {
+      padding: 26px 24px;
+      border-top: 1px solid var(--line);
+    }
+
+    .transport-lines {
+      white-space: pre-line;
+    }
+
+    .notice-card {
+      border: 1px solid var(--line);
+      background: rgb(255 255 255 / 15%);
+    }
+
+    .account-groups {
+      display: grid;
+      gap: 10px;
+    }
+
+    .account-group {
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .account-group summary {
+      display: flex;
+      min-height: 56px;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-family: var(--serif);
+      list-style: none;
+    }
+
+    .account-group summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .account-group summary::after {
+      color: var(--bronze);
+      content: '+';
+      font-family: var(--sans);
+    }
+
+    .account-group[open] summary::after {
+      content: '−';
+    }
+
+    .account-list {
+      display: grid;
+      padding: 0 0 18px;
+      gap: 8px;
+    }
+
+    .account-row {
+      display: grid;
+      padding: 16px;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      background: rgb(121 128 113 / 8%);
+    }
+
+    .account-holder,
+    .account-number {
+      margin: 0;
+    }
+
+    .account-number {
+      color: var(--muted);
+      font-size: 0.78rem;
+      overflow-wrap: anywhere;
+    }
+
+    .copy-button {
+      min-width: 58px;
+      padding: 4px 10px;
+    }
+
+    .share-panel {
+      text-align: center;
+    }
+
+    .share-button {
+      width: min(100%, 260px);
+      margin-top: 28px;
+      padding: 10px 22px;
+      color: var(--paper);
+      background: var(--ink);
+    }
+
+    .outro-section {
+      display: flex;
+      min-height: 72svh;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .outro-lines {
+      display: grid;
+      gap: 4px;
+      font-family: var(--serif);
+      font-size: 1.13rem;
+    }
+
+    .outro-lines p {
+      margin: 0;
+    }
+
+    .outro-meta {
+      margin: 42px 0 0;
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.09em;
+    }
+
+    .outro-signature {
+      margin: 18px 0 0;
+      color: var(--bronze);
+      font-family: var(--serif);
+      font-style: italic;
+    }
+
+    dialog {
+      width: min(calc(100% - 32px), 420px);
+      max-height: calc(100dvh - 32px);
+      padding: 0;
+      border: 0;
+      color: var(--ink);
+      background: var(--paper);
+      box-shadow: 0 24px 80px rgb(22 22 18 / 30%);
+    }
+
+    dialog::backdrop {
+      background: rgb(23 23 20 / 72%);
+      backdrop-filter: blur(3px);
+    }
+
+    .dialog-inner {
+      padding: 28px;
+    }
+
+    .dialog-title {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: 1.5rem;
+      font-weight: 400;
+    }
+
+    .dialog-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 44px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .lightbox-media {
+      min-height: min(68dvh, 620px);
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 30;
+      right: 16px;
+      bottom: 16px;
+      left: 16px;
+      max-width: 400px;
+      min-height: 0;
+      margin: auto;
+      pointer-events: none;
+    }
+
+    @media (min-width: 520px) {
+      .couple-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 700px) {
+      body {
+        padding: 44px 0;
+      }
+
+      .invitation-page {
+        box-shadow: 0 26px 80px rgb(42 38 31 / 22%);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+
+    @media (forced-colors: active) {
+      .media-placeholder,
+      .calendar [aria-current='date'],
+      .share-button {
+        border: 2px solid CanvasText;
+        color: CanvasText;
+        background: Canvas;
+        forced-color-adjust: auto;
+      }
+
+      .story-item::before {
+        background: CanvasText;
+      }
+    }
+  </style>
 </head>
 <body>
+  <main id="invitation-app" class="invitation-page" tabindex="-1"></main>
+  <dialog id="contact-dialog" aria-labelledby="contact-dialog-title">
+    <div class="dialog-inner">
+      <h2 id="contact-dialog-title" class="dialog-title">연락하기</h2>
+      <div data-contact-content></div>
+      <button class="dialog-close" type="button" aria-label="연락처 창 닫기">닫기</button>
+    </div>
+  </dialog>
+  <dialog id="lightbox-dialog" aria-label="웨딩 사진 크게 보기">
+    <div class="dialog-inner">
+      <div class="lightbox-media" data-lightbox-content></div>
+      <button class="dialog-close" type="button" aria-label="사진 창 닫기">닫기</button>
+    </div>
+  </dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
   <script id="wedding-utils">
     const WeddingUtils = Object.freeze((() => {
       const DAY_MS = 24 * 60 * 60 * 1000;
@@ -81,6 +867,373 @@
       return { calendarCells, countdownParts, telHref, toLines };
     })());
   </script>
-  <script id="wedding-app"></script>
+  <script id="wedding-app">
+    const WeddingApp = Object.freeze((() => {
+      const SECTION_RENDERERS = {
+        hero: renderHero,
+        invitation: renderInvitation,
+        couple: renderCouple,
+        schedule: renderSchedule,
+        story: renderStory,
+        gallery: renderGallery,
+        location: renderLocation,
+        transportation: renderTransportation,
+        notices: renderNotices,
+        accounts: renderAccounts,
+        share: renderShare,
+        outro: renderOutro,
+      };
+
+      function element(tag, className, text) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text !== undefined && text !== null) node.textContent = String(text);
+        return node;
+      }
+
+      function mediaFrame(src, alt, label) {
+        const frame = element('figure', 'media-frame');
+        frame.dataset.media = String(src || '');
+        const placeholder = element('span', 'media-placeholder', label || '사진을 준비하고 있습니다');
+        frame.append(placeholder);
+
+        if (String(src || '').trim()) {
+          const image = element('img');
+          image.alt = String(alt || '');
+          image.loading = 'lazy';
+          image.decoding = 'async';
+          image.addEventListener('load', () => {
+            placeholder.remove();
+          }, { once: true });
+          image.addEventListener('error', () => {
+            image.remove();
+            frame.classList.add('has-media-error');
+          }, { once: true });
+          image.src = src;
+          frame.append(image);
+        } else {
+          frame.classList.add('has-media-error');
+        }
+
+        return frame;
+      }
+
+      function sectionShell(key, eyebrow, title, headingTag = 'h2') {
+        const section = element('section', `invitation-section ${key}-section`);
+        section.dataset.section = key;
+        const header = element('header', 'section-header');
+        if (eyebrow) header.append(element('p', 'section-eyebrow', eyebrow));
+        if (title) header.append(element(headingTag, 'section-title', title));
+        const body = element('div', 'section-body');
+        section.append(header, body);
+        return section;
+      }
+
+      function sectionBody(section) {
+        return section.querySelector('.section-body');
+      }
+
+      function renderHero() {
+        const section = sectionShell('hero', 'Wedding Invitation', WEDDING_CONFIG.messages.hero, 'h1');
+        const body = sectionBody(section);
+        const media = mediaFrame(WEDDING_CONFIG.media.hero, `${WEDDING_CONFIG.couple.groom.name}과 ${WEDDING_CONFIG.couple.bride.name}의 대표 사진`, 'Main Portrait');
+        media.classList.add('hero-media');
+        const footer = element('div', 'hero-footer');
+        footer.append(
+          element('p', 'hero-names', `${WEDDING_CONFIG.couple.groom.name} · ${WEDDING_CONFIG.couple.bride.name}`),
+          element('p', 'hero-date', WEDDING_CONFIG.wedding.displayDate),
+        );
+        body.append(media, footer);
+        return section;
+      }
+
+      function renderInvitation() {
+        const section = sectionShell('invitation', 'Invitation', WEDDING_CONFIG.messages.invitationTitle);
+        const lines = element('div', 'invitation-lines');
+        WeddingUtils.toLines(WEDDING_CONFIG.messages.invitation).forEach(line => {
+          lines.append(element('p', '', line || '\u00a0'));
+        });
+        const family = element('p', 'family-line');
+        family.append(
+          document.createTextNode(`${WEDDING_CONFIG.couple.groom.parents.map(parent => parent.name).join(' · ')}의 아들 ${WEDDING_CONFIG.couple.groom.name}`),
+          element('br'),
+          document.createTextNode(`${WEDDING_CONFIG.couple.bride.parents.map(parent => parent.name).join(' · ')}의 딸 ${WEDDING_CONFIG.couple.bride.name}`),
+        );
+        sectionBody(section).append(lines, family);
+        return section;
+      }
+
+      function renderCouple() {
+        const section = sectionShell('couple', 'Bride & Groom', '두 사람을 소개합니다');
+        const grid = element('div', 'couple-grid');
+        [['groom', '신랑'], ['bride', '신부']].forEach(([side, role]) => {
+          const person = WEDDING_CONFIG.couple[side];
+          const card = element('article', 'person-card');
+          const identity = element('div');
+          identity.append(
+            element('p', 'person-role', role),
+            element('h3', 'person-name', person.name),
+            element('p', 'person-english', person.englishName),
+          );
+          card.append(identity);
+          const hasPhone = [person.phone, ...person.parents.map(parent => parent.phone)].some(phone => String(phone || '').trim());
+          if (hasPhone) {
+            const contact = element('button', 'contact-button', `${role}측에 연락하기`);
+            contact.type = 'button';
+            contact.dataset.contactSide = side;
+            card.append(contact);
+          }
+          grid.append(card);
+        });
+        sectionBody(section).append(grid);
+        return section;
+      }
+
+      function renderSchedule() {
+        const section = sectionShell('schedule', 'The Day', '예식 일정');
+        const body = sectionBody(section);
+        const summary = element('div', 'schedule-summary');
+        summary.append(
+          element('p', 'schedule-date', WEDDING_CONFIG.wedding.displayDate),
+          element('p', 'schedule-meta', `${WEDDING_CONFIG.wedding.displayTime} · ${WEDDING_CONFIG.wedding.venue}`),
+        );
+        body.append(summary);
+
+        const cells = WeddingUtils.calendarCells(WEDDING_CONFIG.wedding.dateKey);
+        if (cells.length) {
+          const [year, month] = WEDDING_CONFIG.wedding.dateKey.split('-');
+          const table = element('table', 'calendar');
+          table.append(element('caption', '', `${year}. ${month}`));
+          const head = element('thead');
+          const headRow = element('tr');
+          [['SUN', '일요일'], ['MON', '월요일'], ['TUE', '화요일'], ['WED', '수요일'], ['THU', '목요일'], ['FRI', '금요일'], ['SAT', '토요일']].forEach(([day, koreanDay]) => {
+            const columnHeader = element('th');
+            columnHeader.setAttribute('scope', 'col');
+            const abbreviation = element('abbr', '', day);
+            abbreviation.title = koreanDay;
+            columnHeader.append(abbreviation);
+            headRow.append(columnHeader);
+          });
+          head.append(headRow);
+          const calendarBody = element('tbody');
+          for (let index = 0; index < cells.length; index += 7) {
+            const row = element('tr');
+            cells.slice(index, index + 7).forEach(cell => {
+              const dateCell = element('td');
+              if (cell) {
+                dateCell.append(element('span', '', cell.day));
+                if (cell.isWedding) dateCell.setAttribute('aria-current', 'date');
+              }
+              row.append(dateCell);
+            });
+            calendarBody.append(row);
+          }
+          table.append(head, calendarBody);
+          body.append(table);
+        }
+
+        const countdownParts = WeddingUtils.countdownParts(Date.parse(WEDDING_CONFIG.wedding.iso), Date.now());
+        if (countdownParts.state !== 'invalid') {
+          const countdown = element('div', 'countdown');
+          countdown.setAttribute('aria-label', '결혼식까지 남은 시간');
+          [['days', 'Days'], ['hours', 'Hours'], ['minutes', 'Min'], ['seconds', 'Sec']].forEach(([unit, label]) => {
+            const item = element('div', 'countdown-item');
+            const value = element('strong', 'countdown-value', countdownParts[unit]);
+            value.dataset.countdownUnit = unit;
+            item.append(value, element('span', 'countdown-label', label));
+            countdown.append(item);
+          });
+          body.append(countdown);
+          const stateText = countdownParts.state === 'before'
+            ? '두 사람의 결혼식이 다가오고 있습니다.'
+            : countdownParts.state === 'today'
+              ? '오늘, 저희 결혼합니다.'
+              : '함께 축복해 주셔서 감사합니다.';
+          body.append(element('p', 'countdown-message', stateText));
+        }
+        return section;
+      }
+
+      function renderStory() {
+        const section = sectionShell('story', 'Our Story', '우리의 시간');
+        const list = element('div', 'story-list');
+        WEDDING_CONFIG.story.forEach(item => {
+          const article = element('article', 'story-item');
+          article.append(
+            element('p', 'story-year', item.year),
+            element('p', 'story-label', item.label),
+            element('h3', 'story-title', item.title),
+            element('p', 'story-body', item.body),
+          );
+          list.append(article);
+        });
+        sectionBody(section).append(list);
+        return section;
+      }
+
+      function renderGallery() {
+        const section = sectionShell('gallery', 'Gallery', '빛나는 순간들');
+        const grid = element('div', 'gallery-grid');
+        WEDDING_CONFIG.media.gallery.forEach((item, index) => {
+          const button = element('button', 'gallery-button');
+          button.type = 'button';
+          button.dataset.galleryIndex = index;
+          button.setAttribute('aria-label', `${item.alt || `웨딩 사진 ${index + 1}`} 크게 보기`);
+          button.append(mediaFrame(item.src, item.alt, `Photo ${String(index + 1).padStart(2, '0')}`));
+          grid.append(button);
+        });
+        sectionBody(section).append(grid);
+        return section;
+      }
+
+      function renderLocation() {
+        const section = sectionShell('location', 'Location', '오시는 길');
+        const body = sectionBody(section);
+        const address = element('p', 'location-address', WEDDING_CONFIG.wedding.venue);
+        address.append(element('span', 'location-hall', WEDDING_CONFIG.wedding.hall), element('br'), document.createTextNode(WEDDING_CONFIG.wedding.address));
+        body.append(address);
+        if (String(WEDDING_CONFIG.wedding.phone || '').trim()) {
+          const phone = element('a', 'venue-phone', WEDDING_CONFIG.wedding.phone);
+          phone.href = WeddingUtils.telHref(WEDDING_CONFIG.wedding.phone);
+          phone.setAttribute('aria-label', `${WEDDING_CONFIG.wedding.venue}에 전화하기`);
+          body.append(phone);
+        }
+        const map = mediaFrame(WEDDING_CONFIG.media.map, `${WEDDING_CONFIG.wedding.venue} 약도`, 'Map Preview');
+        map.classList.add('map-media');
+        body.append(map);
+        const links = element('nav', 'navigation-links');
+        links.setAttribute('aria-label', '지도 앱으로 길 찾기');
+        [['naver', '네이버 지도'], ['kakao', '카카오맵'], ['tmap', '티맵']].forEach(([key, label]) => {
+          const url = String(WEDDING_CONFIG.navigation[key] || '').trim();
+          if (!url) return;
+          const link = element('a', 'nav-link', label);
+          link.href = url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          links.append(link);
+        });
+        if (links.childElementCount) body.append(links);
+        return section;
+      }
+
+      function renderTransportation() {
+        const section = sectionShell('transportation', 'Information', '교통 안내');
+        const list = element('div', 'transport-list');
+        WEDDING_CONFIG.transportation.forEach(item => {
+          const article = element('article', 'transport-item');
+          article.append(element('h3', 'transport-title', item.title));
+          const lines = WeddingUtils.toLines(item.lines).filter(Boolean).join('\n');
+          if (lines) article.append(element('p', 'transport-lines', lines));
+          list.append(article);
+        });
+        sectionBody(section).append(list);
+        return section;
+      }
+
+      function renderNotices() {
+        const section = sectionShell('notices', 'Notice', '안내 말씀');
+        const list = element('div', 'notice-list');
+        WEDDING_CONFIG.notices.forEach(item => {
+          const article = element('article', 'notice-card');
+          article.append(
+            element('p', 'card-eyebrow', item.eyebrow),
+            element('h3', 'notice-title', item.title),
+            element('p', 'notice-body', item.body),
+          );
+          list.append(article);
+        });
+        sectionBody(section).append(list);
+        return section;
+      }
+
+      function renderAccounts() {
+        const section = sectionShell('accounts', 'With Thanks', '마음 전하실 곳');
+        const groups = element('div', 'account-groups');
+        const sides = [...new Set(WEDDING_CONFIG.accounts.map(account => account.side))];
+        sides.forEach(side => {
+          const details = element('details', 'account-group');
+          details.dataset.accountSide = side;
+          details.append(element('summary', '', side));
+          const list = element('div', 'account-list');
+          WEDDING_CONFIG.accounts.filter(account => account.side === side).forEach(account => {
+            const row = element('div', 'account-row');
+            const info = element('div');
+            info.append(
+              element('p', 'account-holder', `${account.holder} · ${account.bank}`),
+              element('p', 'account-number', account.number),
+            );
+            row.append(info);
+            if (String(account.number || '').trim()) {
+              const copy = element('button', 'copy-button', '복사');
+              copy.type = 'button';
+              copy.dataset.copyAccount = account.number;
+              copy.setAttribute('aria-label', `${account.holder} 계좌번호 복사`);
+              row.append(copy);
+            }
+            list.append(row);
+          });
+          details.append(list);
+          groups.append(details);
+        });
+        sectionBody(section).append(groups);
+        return section;
+      }
+
+      function renderShare() {
+        const section = sectionShell('share', 'Share', '초대장을 나눠주세요');
+        const panel = element('div', 'share-panel');
+        panel.append(element('p', 'section-copy', WEDDING_CONFIG.sharing.text));
+        const button = element('button', 'share-button', '초대장 공유하기');
+        button.type = 'button';
+        button.dataset.share = '';
+        panel.append(button);
+        sectionBody(section).append(panel);
+        return section;
+      }
+
+      function renderOutro() {
+        const section = sectionShell('outro', 'Minjun & Seoyeon', '함께해 주셔서 감사합니다');
+        section.querySelector('.section-title').classList.add('visually-hidden');
+        const body = sectionBody(section);
+        const lines = element('div', 'outro-lines');
+        WeddingUtils.toLines(WEDDING_CONFIG.messages.outro).forEach(line => lines.append(element('p', '', line)));
+        body.append(
+          lines,
+          element('p', 'outro-meta', `${WEDDING_CONFIG.wedding.displayDate}\n${WEDDING_CONFIG.wedding.venue} · ${WEDDING_CONFIG.wedding.hall}`),
+          element('p', 'outro-signature', WEDDING_CONFIG.messages.signature),
+        );
+        return section;
+      }
+
+      function applyTheme() {
+        const root = document.documentElement;
+        root.style.setProperty('--page-width', WEDDING_CONFIG.theme.maxWidth);
+        root.style.setProperty('--paper', WEDDING_CONFIG.theme.paper);
+        root.style.setProperty('--ink', WEDDING_CONFIG.theme.ink);
+        root.style.setProperty('--muted', WEDDING_CONFIG.theme.muted);
+        root.style.setProperty('--sage', WEDDING_CONFIG.theme.sage);
+        root.style.setProperty('--bronze', WEDDING_CONFIG.theme.bronze);
+      }
+
+      function renderSections() {
+        const app = document.getElementById('invitation-app');
+        if (!app) return;
+        const fragment = new DocumentFragment();
+        Object.entries(SECTION_RENDERERS).forEach(([key, renderer]) => {
+          if (WEDDING_CONFIG.sections[key] === true) fragment.append(renderer());
+        });
+        app.replaceChildren(fragment);
+      }
+
+      function init() {
+        applyTheme();
+        renderSections();
+      }
+
+      return { init, renderSections };
+    })());
+
+    WeddingApp.init();
+  </script>
 </body>
 </html>
