@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>김민준 ♥ 이서연 결혼식</title>
+  <title>모바일 청첩장</title>
   <script id="wedding-config">
     const WEDDING_CONFIG = Object.freeze({
       sections: { intro: true, hero: true, invitation: true, couple: true, schedule: true, story: true, gallery: true, location: true, transportation: true, notices: true, accounts: true, share: true, outro: true },
@@ -1011,7 +1011,7 @@
         <div class="intro-actions">
           <div class="intro-progress" aria-hidden="true"></div>
           <button id="intro-sound" class="intro-control intro-sound" type="button"></button>
-          <button id="intro-skip" class="intro-control" type="button">SKIP</button>
+          <button id="intro-skip" class="intro-control" type="button" aria-label="인트로 건너뛰기">SKIP</button>
           <p class="intro-status" data-intro-status aria-live="polite"></p>
         </div>
       </div>
@@ -1106,6 +1106,7 @@
       let introFinished = false;
       let introFallbackTimer = 0;
       let introRemovalTimer = 0;
+      let countdownTimer = 0;
       let galleryIndex = 0;
       let toastTimer = 0;
 
@@ -1257,26 +1258,54 @@
           body.append(table);
         }
 
-        const countdownParts = WeddingUtils.countdownParts(Date.parse(WEDDING_CONFIG.wedding.iso), Date.now());
+        const targetMs = Date.parse(WEDDING_CONFIG.wedding.iso);
+        const countdownParts = WeddingUtils.countdownParts(targetMs, Date.now());
         if (countdownParts.state !== 'invalid') {
           const countdown = element('div', 'countdown');
           countdown.setAttribute('aria-label', '결혼식까지 남은 시간');
           [['days', 'Days'], ['hours', 'Hours'], ['minutes', 'Min'], ['seconds', 'Sec']].forEach(([unit, label]) => {
             const item = element('div', 'countdown-item');
-            const value = element('strong', 'countdown-value', countdownParts[unit]);
+            const value = element('strong', 'countdown-value', 0);
             value.dataset.countdownUnit = unit;
             item.append(value, element('span', 'countdown-label', label));
             countdown.append(item);
           });
           body.append(countdown);
-          const stateText = countdownParts.state === 'before'
-            ? '두 사람의 결혼식이 다가오고 있습니다.'
-            : countdownParts.state === 'today'
-              ? '오늘, 저희 결혼합니다.'
-              : '함께 축복해 주셔서 감사합니다.';
-          body.append(element('p', 'countdown-message', stateText));
+          const message = element('p', 'countdown-message');
+          body.append(message);
+          startCountdown(countdown, message, targetMs);
         }
         return section;
+      }
+
+      function countdownMessage(state) {
+        if (state === 'before') return '두 사람의 결혼식이 다가오고 있습니다.';
+        if (state === 'today') return '오늘, 저희 결혼합니다.';
+        return '함께 축복해 주셔서 감사합니다.';
+      }
+
+      function stopCountdown() {
+        if (!countdownTimer) return;
+        window.clearInterval(countdownTimer);
+        countdownTimer = 0;
+      }
+
+      function updateCountdown(countdown, message, targetMs) {
+        const parts = WeddingUtils.countdownParts(targetMs, Date.now());
+        countdown.querySelectorAll('[data-countdown-unit]').forEach(value => {
+          value.textContent = String(parts[value.dataset.countdownUnit]);
+        });
+        message.textContent = countdownMessage(parts.state);
+        if (parts.state !== 'before') stopCountdown();
+        return parts.state;
+      }
+
+      function startCountdown(countdown, message, targetMs) {
+        stopCountdown();
+        if (updateCountdown(countdown, message, targetMs) !== 'before') return;
+        countdownTimer = window.setInterval(() => {
+          updateCountdown(countdown, message, targetMs);
+        }, 1000);
       }
 
       function renderStory() {
@@ -1448,6 +1477,7 @@
       function renderSections() {
         const app = document.getElementById('invitation-app');
         if (!app) return;
+        stopCountdown();
         const fragment = new DocumentFragment();
         Object.entries(SECTION_RENDERERS).forEach(([key, renderer]) => {
           if (WEDDING_CONFIG.sections[key] === true) fragment.append(renderer());
@@ -1689,7 +1719,21 @@
         scheduleIntroFallback();
       }
 
+      function handleIntroKeydown(event) {
+        if (event.key === 'Escape' && !introFinished) finishIntro('escape');
+      }
+
+      function restoreInvitationAccess(app) {
+        if (!app) return;
+        app.inert = false;
+        app.removeAttribute('inert');
+        app.removeAttribute('aria-hidden');
+      }
+
       function finishIntro(reason = 'complete') {
+        const app = document.getElementById('invitation-app');
+        document.removeEventListener('keydown', handleIntroKeydown);
+        restoreInvitationAccess(app);
         if (introFinished) return;
         introFinished = true;
         window.clearTimeout(introFallbackTimer);
@@ -1698,7 +1742,6 @@
 
         const intro = document.getElementById('intro');
         const video = document.getElementById('intro-video');
-        const app = document.getElementById('invitation-app');
         if (video) {
           try {
             video.pause();
@@ -1735,11 +1778,21 @@
       }
 
       function renderIntro() {
-        if (WEDDING_CONFIG.sections.intro !== true) return;
-        const template = document.getElementById('intro-template');
         const app = document.getElementById('invitation-app');
-        if (!template || !app) return;
+        document.removeEventListener('keydown', handleIntroKeydown);
+        if (WEDDING_CONFIG.sections.intro !== true) {
+          restoreInvitationAccess(app);
+          return;
+        }
+        const template = document.getElementById('intro-template');
+        if (!template || !app) {
+          restoreInvitationAccess(app);
+          return;
+        }
         introFinished = false;
+        app.inert = true;
+        app.setAttribute('inert', '');
+        app.setAttribute('aria-hidden', 'true');
         app.before(template.content.cloneNode(true));
         document.body.classList.add('is-intro-open');
 
@@ -1747,6 +1800,10 @@
         const video = document.getElementById('intro-video');
         const skip = document.getElementById('intro-skip');
         const sound = document.getElementById('intro-sound');
+        if (!intro || !video || !skip || !sound) {
+          finishIntro('missing-intro');
+          return;
+        }
         intro.querySelector('[data-intro-eyebrow]').textContent = WEDDING_CONFIG.intro.eyebrow;
         intro.querySelector('[data-intro-title]').textContent = WEDDING_CONFIG.intro.title;
 
@@ -1764,6 +1821,7 @@
         };
         updateSoundControl();
 
+        skip.setAttribute('aria-label', '인트로 건너뛰기');
         skip.addEventListener('click', () => finishIntro('skip'));
         sound.addEventListener('click', () => {
           video.muted = !video.muted;
@@ -1771,9 +1829,8 @@
         });
         video.addEventListener('ended', () => finishIntro('ended'));
         video.addEventListener('error', handleIntroMediaError);
-        document.addEventListener('keydown', event => {
-          if (event.key === 'Escape' && !introFinished) finishIntro('escape');
-        });
+        document.addEventListener('keydown', handleIntroKeydown);
+        skip.focus({ preventScroll: true });
 
         if (!String(WEDDING_CONFIG.intro.video || '').trim()) {
           handleIntroMediaError();
@@ -1789,6 +1846,7 @@
       }
 
       function init() {
+        document.title = `${WEDDING_CONFIG.couple.groom.name} ♥ ${WEDDING_CONFIG.couple.bride.name} 결혼식에 초대합니다`;
         applyTheme();
         renderSections();
         bindInteractions();

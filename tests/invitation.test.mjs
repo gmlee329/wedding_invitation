@@ -30,6 +30,247 @@ function loadContracts() {
   return context.__contracts;
 }
 
+class FakeClassList {
+  constructor() {
+    this.values = new Set();
+  }
+
+  add(...names) {
+    names.forEach(name => this.values.add(name));
+  }
+
+  remove(...names) {
+    names.forEach(name => this.values.delete(name));
+  }
+
+  contains(name) {
+    return this.values.has(name);
+  }
+}
+
+class FakeNode {
+  constructor(tagName = 'div') {
+    this.tagName = tagName.toUpperCase();
+    this.children = [];
+    this.dataset = {};
+    this.attributes = new Map();
+    this.classList = new FakeClassList();
+    this.style = { setProperty() {} };
+    this.textContent = '';
+    this.focusCalls = [];
+    this.listeners = new Map();
+    this.inert = false;
+  }
+
+  set className(value) {
+    this.classList = new FakeClassList();
+    String(value).split(/\s+/).filter(Boolean).forEach(name => this.classList.add(name));
+  }
+
+  get className() {
+    return [...this.classList.values].join(' ');
+  }
+
+  append(...nodes) {
+    nodes.forEach(node => {
+      if (node?.isFragment) this.children.push(...node.children);
+      else if (node) this.children.push(node);
+    });
+  }
+
+  before() {}
+
+  replaceChildren(...nodes) {
+    this.children = [];
+    this.append(...nodes);
+  }
+
+  setAttribute(name, value) {
+    this.attributes.set(name, String(value));
+  }
+
+  getAttribute(name) {
+    return this.attributes.get(name) ?? null;
+  }
+
+  removeAttribute(name) {
+    this.attributes.delete(name);
+  }
+
+  addEventListener(type, listener) {
+    const listeners = this.listeners.get(type) || [];
+    listeners.push(listener);
+    this.listeners.set(type, listeners);
+  }
+
+  removeEventListener(type, listener) {
+    const listeners = this.listeners.get(type) || [];
+    this.listeners.set(type, listeners.filter(candidate => candidate !== listener));
+  }
+
+  focus(options) {
+    this.focusCalls.push(options);
+  }
+
+  pause() {}
+
+  play() {}
+
+  remove() {
+    this.removed = true;
+  }
+
+  matches(selector) {
+    if (selector.startsWith('.')) return this.classList.contains(selector.slice(1));
+    const dataMatch = selector.match(/^\[data-([a-z-]+)\]$/);
+    if (dataMatch) {
+      const key = dataMatch[1].replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+      return Object.hasOwn(this.dataset, key);
+    }
+    return false;
+  }
+
+  querySelector(selector) {
+    return this.querySelectorAll(selector)[0] || null;
+  }
+
+  querySelectorAll(selector) {
+    const matches = [];
+    const visit = node => {
+      node.children.forEach(child => {
+        if (child.matches?.(selector)) matches.push(child);
+        visit(child);
+      });
+    };
+    visit(this);
+    return matches;
+  }
+}
+
+class FakeFragment extends FakeNode {
+  constructor() {
+    super('fragment');
+    this.isFragment = true;
+  }
+
+  cloneNode() {
+    return new FakeFragment();
+  }
+}
+
+function createHarness({ now = Date.now(), introEnabled = true, names } = {}) {
+  const ids = new Map();
+  const documentListeners = new Map();
+  const clearedIntervals = [];
+  const intervals = [];
+  let currentNow = now;
+
+  const document = {
+    title: source().match(/<title>([^<]*)<\/title>/)[1],
+    body: new FakeNode('body'),
+    documentElement: new FakeNode('html'),
+    createElement: tag => new FakeNode(tag),
+    createTextNode: text => Object.assign(new FakeNode('#text'), { textContent: String(text) }),
+    getElementById: id => ids.get(id) || null,
+    querySelectorAll: () => [],
+    addEventListener(type, listener) {
+      const listeners = documentListeners.get(type) || [];
+      listeners.push(listener);
+      documentListeners.set(type, listeners);
+    },
+    removeEventListener(type, listener) {
+      const listeners = documentListeners.get(type) || [];
+      documentListeners.set(type, listeners.filter(candidate => candidate !== listener));
+    },
+    execCommand: () => true,
+  };
+
+  const app = new FakeNode('main');
+  ids.set('invitation-app', app);
+
+  const template = new FakeNode('template');
+  template.content = new FakeFragment();
+  ids.set('intro-template', template);
+
+  const intro = new FakeNode('div');
+  const eyebrow = new FakeNode('p');
+  eyebrow.dataset.introEyebrow = '';
+  const heading = new FakeNode('h1');
+  heading.dataset.introTitle = '';
+  const status = new FakeNode('p');
+  status.dataset.introStatus = '';
+  intro.append(eyebrow, heading, status);
+  ids.set('intro', intro);
+
+  const video = new FakeNode('video');
+  const skip = new FakeNode('button');
+  const sound = new FakeNode('button');
+  ids.set('intro-video', video);
+  ids.set('intro-skip', skip);
+  ids.set('intro-sound', sound);
+
+  class HarnessDate extends Date {
+    static now() {
+      return currentNow;
+    }
+  }
+
+  const window = {
+    setInterval(callback, delay) {
+      const id = intervals.length + 1;
+      intervals.push({ id, callback, delay });
+      return id;
+    },
+    clearInterval(id) {
+      clearedIntervals.push(id);
+    },
+    setTimeout: () => 1,
+    clearTimeout() {},
+    requestAnimationFrame: callback => callback(),
+    matchMedia: () => ({ matches: true }),
+  };
+
+  let configScript = scriptById(source(), 'wedding-config');
+  if (!introEnabled) configScript = configScript.replace('intro: true', 'intro: false');
+  if (names) {
+    configScript = configScript
+      .replace("groom: { name: '김민준'", `groom: { name: '${names.groom}'`)
+      .replace("bride: { name: '이서연'", `bride: { name: '${names.bride}'`);
+  }
+
+  const appScript = scriptById(source(), 'wedding-app')
+    .replace(
+      'return { init, renderSections, finishIntro, openDialog, closeDialog, copyText };',
+      'return { init, renderSections, renderSchedule, renderIntro, finishIntro, openDialog, closeDialog, copyText };',
+    )
+    .replace(/\n\s*WeddingApp\.init\(\);\s*$/, '\nglobalThis.__app = WeddingApp;');
+  const context = vm.createContext({
+    console,
+    URL,
+    Date: HarnessDate,
+    DocumentFragment: FakeFragment,
+    document,
+    window,
+    navigator: {},
+    location: { href: 'file:///invitation/index.html' },
+  });
+  vm.runInContext(`${configScript}\n${scriptById(source(), 'wedding-utils')}\n${appScript}`, context);
+
+  return {
+    app: context.__app,
+    appNode: app,
+    document,
+    documentListeners,
+    intervals,
+    clearedIntervals,
+    intro,
+    skip,
+    setNow(value) {
+      currentNow = value;
+    },
+  };
+}
+
 test('runtime is one self-contained index without external code', () => {
   const html = source();
   assert.match(html, /<script[^>]*id="wedding-config"/);
@@ -82,6 +323,96 @@ test('countdownParts uses the Korea calendar date after the wedding time', () =>
   const target = Date.parse('2026-10-24T12:30:00+09:00');
   assert.equal(utils.countdownParts(target, Date.parse('2026-10-24T18:00:00+09:00')).state, 'today');
   assert.equal(utils.countdownParts(target, Date.parse('2026-10-25T00:00:00+09:00')).state, 'after');
+});
+
+test('initialization derives the document title from configured couple names', () => {
+  const harness = createHarness({
+    introEnabled: false,
+    names: { groom: '새신랑', bride: '새신부' },
+  });
+
+  harness.app.init();
+
+  assert.equal(harness.document.title, '새신랑 ♥ 새신부 결혼식에 초대합니다');
+  assert.equal(source().match(/<title>([^<]*)<\/title>/)[1], '모바일 청첩장');
+  const outsideConfig = source().replace(/<script[^>]*id="wedding-config"[^>]*>[\s\S]*?<\/script>/, '');
+  assert.doesNotMatch(outsideConfig, /김민준|이서연/);
+});
+
+test('schedule refreshes its countdown every second and stops after the before state', () => {
+  const target = Date.parse('2026-10-24T12:30:00+09:00');
+  const harness = createHarness({ now: target - 1000 });
+
+  const schedule = harness.app.renderSchedule();
+
+  assert.equal(harness.intervals.length, 1);
+  assert.equal(harness.intervals[0].delay, 1000);
+  assert.deepEqual(
+    schedule.querySelectorAll('[data-countdown-unit]').map(node => node.textContent),
+    ['0', '0', '0', '1'],
+  );
+
+  const rerenderedSchedule = harness.app.renderSchedule();
+  assert.equal(harness.intervals.length, 2);
+  assert.deepEqual(harness.clearedIntervals, [harness.intervals[0].id]);
+
+  harness.setNow(target);
+  harness.intervals[1].callback();
+
+  assert.deepEqual(
+    rerenderedSchedule.querySelectorAll('[data-countdown-unit]').map(node => node.textContent),
+    ['0', '0', '0', '0'],
+  );
+  assert.equal(rerenderedSchedule.querySelector('.countdown-message').textContent, '오늘, 저희 결혼합니다.');
+  assert.deepEqual(harness.clearedIntervals, harness.intervals.map(interval => interval.id));
+
+  const after = createHarness({ now: target + 24 * 60 * 60 * 1000 });
+  const afterSchedule = after.app.renderSchedule();
+  assert.equal(after.intervals.length, 0);
+  assert.equal(afterSchedule.querySelector('.countdown-message').textContent, '함께 축복해 주셔서 감사합니다.');
+});
+
+test('intro hides and inerts the invitation, labels and focuses skip, then restores access', () => {
+  const harness = createHarness();
+
+  harness.app.renderIntro();
+
+  assert.equal(harness.appNode.inert, true);
+  assert.equal(harness.appNode.getAttribute('aria-hidden'), 'true');
+  assert.equal(harness.skip.getAttribute('aria-label'), '인트로 건너뛰기');
+  assert.equal(harness.skip.focusCalls.length, 1);
+  assert.equal(harness.skip.focusCalls[0].preventScroll, true);
+
+  harness.app.finishIntro('skip');
+
+  assert.equal(harness.appNode.inert, false);
+  assert.equal(harness.appNode.getAttribute('aria-hidden'), null);
+  assert.equal(harness.appNode.focusCalls.length, 1);
+  assert.equal(harness.appNode.focusCalls[0].preventScroll, true);
+});
+
+test('intro removes its Escape listener on finish and stays inactive when disabled', () => {
+  const harness = createHarness();
+  harness.app.renderIntro();
+  const keydownHandler = harness.documentListeners.get('keydown')[0];
+
+  harness.app.finishIntro('skip');
+
+  assert.ok(keydownHandler);
+  assert.deepEqual(harness.documentListeners.get('keydown'), []);
+
+  const repeated = createHarness();
+  repeated.app.renderIntro();
+  repeated.app.renderIntro();
+  assert.equal(repeated.documentListeners.get('keydown').length, 1);
+  repeated.app.finishIntro('skip');
+  assert.deepEqual(repeated.documentListeners.get('keydown'), []);
+
+  const disabled = createHarness({ introEnabled: false });
+  disabled.app.renderIntro();
+  assert.equal(disabled.appNode.inert, false);
+  assert.equal(disabled.appNode.getAttribute('aria-hidden'), null);
+  assert.deepEqual(disabled.documentListeners.get('keydown') || [], []);
 });
 
 test('app provides every safe section renderer', () => {
