@@ -62,6 +62,10 @@
       word-break: keep-all;
     }
 
+    body.is-intro-open {
+      overflow: hidden;
+    }
+
     button,
     a {
       -webkit-tap-highlight-color: transparent;
@@ -124,9 +128,142 @@
       outline: none;
     }
 
+    .intro {
+      position: fixed;
+      z-index: 50;
+      inset: 0;
+      display: grid;
+      overflow: hidden;
+      place-items: center;
+      color: #f5f1e8;
+      background:
+        radial-gradient(circle at 50% 38%, rgb(121 128 113 / 42%), transparent 44%),
+        #171814;
+      opacity: 1;
+      transition: opacity 520ms ease;
+    }
+
+    .intro.is-exiting {
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .intro-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.78;
+    }
+
+    .intro.has-media-error .intro-video {
+      opacity: 0.16;
+    }
+
+    .intro-shade {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgb(15 16 13 / 32%), rgb(15 16 13 / 18%) 44%, rgb(15 16 13 / 76%));
+    }
+
+    .intro-content {
+      position: relative;
+      display: grid;
+      width: min(calc(100% - 48px), 420px);
+      min-height: 100svh;
+      padding: 64px 0 38px;
+      grid-template-rows: 1fr auto;
+      text-align: center;
+    }
+
+    .intro-heading {
+      display: grid;
+      place-content: center;
+    }
+
+    .intro-eyebrow {
+      margin: 0 0 15px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+    }
+
+    .intro-title {
+      max-width: 7em;
+      margin: 0 auto;
+      font-family: var(--serif);
+      font-size: clamp(3rem, 16vw, 5.4rem);
+      font-weight: 400;
+      letter-spacing: -0.06em;
+      line-height: 0.9;
+    }
+
+    .intro-actions {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .intro-progress {
+      position: relative;
+      height: 1px;
+      grid-column: 1 / -1;
+      overflow: hidden;
+      background: rgb(255 255 255 / 30%);
+    }
+
+    .intro-progress::after {
+      position: absolute;
+      inset: 0;
+      background: currentColor;
+      content: '';
+      transform-origin: left;
+      animation: intro-progress 8s linear infinite;
+    }
+
+    @keyframes intro-progress {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+
+    .intro-control {
+      min-width: 88px;
+      padding: 8px 12px;
+      border: 1px solid rgb(255 255 255 / 48%);
+      color: inherit;
+      background: rgb(15 16 13 / 28%);
+      cursor: pointer;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+    }
+
+    .intro-sound {
+      justify-self: start;
+    }
+
+    .intro-status {
+      margin: 12px 0 0;
+      grid-column: 1 / -1;
+      font-size: 0.72rem;
+    }
+
     .invitation-section {
       position: relative;
       padding: clamp(72px, 20vw, 112px) clamp(24px, 8vw, 44px);
+    }
+
+    .has-reveal-motion .reveal {
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity 720ms ease, transform 720ms ease;
+    }
+
+    .has-reveal-motion .reveal.is-visible {
+      opacity: 1;
+      transform: none;
     }
 
     .invitation-section + .invitation-section::before {
@@ -731,6 +868,60 @@
       min-height: min(68dvh, 620px);
     }
 
+    .lightbox-media .media-frame {
+      width: 100%;
+      min-height: min(68dvh, 620px);
+    }
+
+    .lightbox-controls {
+      display: grid;
+      padding: 12px 28px 24px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .lightbox-control {
+      border: 1px solid var(--line);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .contact-list {
+      display: grid;
+      margin: 24px 0 0;
+      gap: 10px;
+    }
+
+    .contact-row {
+      display: grid;
+      padding: 14px 0;
+      border-top: 1px solid var(--line);
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .contact-name {
+      margin: 0;
+    }
+
+    .contact-phone,
+    .address-copy-button {
+      display: inline-flex;
+      min-height: 44px;
+      align-items: center;
+      color: var(--sage);
+      font-size: 0.78rem;
+    }
+
+    .address-copy-button {
+      margin: 10px auto 22px;
+      padding: 8px 16px;
+      border: 1px solid var(--line);
+      background: transparent;
+      cursor: pointer;
+    }
+
     .toast {
       position: fixed;
       z-index: 30;
@@ -741,6 +932,17 @@
       min-height: 0;
       margin: auto;
       pointer-events: none;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .toast.is-visible {
+      padding: 10px 16px;
+      color: var(--paper);
+      background: var(--ink);
+      opacity: 1;
+      transform: none;
     }
 
     @media (min-width: 520px) {
@@ -772,6 +974,12 @@
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
       }
+
+      .has-reveal-motion .reveal,
+      .has-reveal-motion .reveal.is-visible {
+        opacity: 1;
+        transform: none;
+      }
     }
 
     @media (forced-colors: active) {
@@ -791,6 +999,24 @@
   </style>
 </head>
 <body>
+  <template id="intro-template">
+    <div id="intro" class="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+      <video id="intro-video" class="intro-video" autoplay muted playsinline preload="auto"></video>
+      <div class="intro-shade" aria-hidden="true"></div>
+      <div class="intro-content">
+        <div class="intro-heading">
+          <p class="intro-eyebrow" data-intro-eyebrow></p>
+          <h1 id="intro-title" class="intro-title" data-intro-title></h1>
+        </div>
+        <div class="intro-actions">
+          <div class="intro-progress" aria-hidden="true"></div>
+          <button id="intro-sound" class="intro-control intro-sound" type="button"></button>
+          <button id="intro-skip" class="intro-control" type="button">SKIP</button>
+          <p class="intro-status" data-intro-status aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+  </template>
   <main id="invitation-app" class="invitation-page" tabindex="-1"></main>
   <dialog id="contact-dialog" aria-labelledby="contact-dialog-title">
     <div class="dialog-inner">
@@ -876,6 +1102,12 @@
         share: renderShare,
         outro: renderOutro,
       };
+      const dialogTriggers = new WeakMap();
+      let introFinished = false;
+      let introFallbackTimer = 0;
+      let introRemovalTimer = 0;
+      let galleryIndex = 0;
+      let toastTimer = 0;
 
       function element(tag, className, text) {
         const node = document.createElement(tag);
@@ -912,7 +1144,7 @@
       }
 
       function sectionShell(key, eyebrow, title, headingTag = 'h2') {
-        const section = element('section', `invitation-section ${key}-section`);
+        const section = element('section', `invitation-section ${key}-section reveal`);
         section.dataset.section = key;
         const header = element('header', 'section-header');
         if (eyebrow) header.append(element('p', 'section-eyebrow', eyebrow));
@@ -1085,6 +1317,12 @@
         const address = element('p', 'location-address', WEDDING_CONFIG.wedding.venue);
         address.append(element('span', 'location-hall', WEDDING_CONFIG.wedding.hall), element('br'), document.createTextNode(WEDDING_CONFIG.wedding.address));
         body.append(address);
+        if (String(WEDDING_CONFIG.wedding.address || '').trim()) {
+          const copyAddress = element('button', 'address-copy-button', '주소 복사');
+          copyAddress.type = 'button';
+          copyAddress.dataset.copyAddress = WEDDING_CONFIG.wedding.address;
+          body.append(copyAddress);
+        }
         if (String(WEDDING_CONFIG.wedding.phone || '').trim()) {
           const phone = element('a', 'venue-phone', WEDDING_CONFIG.wedding.phone);
           phone.href = WeddingUtils.telHref(WEDDING_CONFIG.wedding.phone);
@@ -1217,12 +1455,348 @@
         app.replaceChildren(fragment);
       }
 
+      function announce(message) {
+        const toast = document.getElementById('toast');
+        if (!toast || !message) return;
+        window.clearTimeout(toastTimer);
+        toast.textContent = '';
+        window.requestAnimationFrame(() => {
+          toast.textContent = message;
+          toast.classList.add('is-visible');
+          toastTimer = window.setTimeout(() => toast.classList.remove('is-visible'), 2400);
+        });
+      }
+
+      async function copyText(value) {
+        const text = String(value || '');
+        if (!text) return false;
+
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+          try {
+            await navigator.clipboard.writeText(text);
+            return true;
+          } catch (error) {
+            // Security restrictions can reject clipboard access for local files.
+          }
+        }
+
+        const textarea = element('textarea', 'visually-hidden');
+        textarea.value = text;
+        textarea.readOnly = true;
+        textarea.setAttribute('aria-hidden', 'true');
+        document.body.append(textarea);
+        textarea.select();
+        textarea.setSelectionRange(0, text.length);
+        let copied = false;
+        try {
+          copied = document.execCommand('copy');
+        } catch (error) {
+          copied = false;
+        } finally {
+          textarea.remove();
+        }
+        return copied;
+      }
+
+      function restoreDialogFocus(dialog) {
+        const trigger = dialogTriggers.get(dialog);
+        dialogTriggers.delete(dialog);
+        if (trigger && trigger.isConnected && typeof trigger.focus === 'function') trigger.focus();
+      }
+
+      function openDialog(dialog, trigger) {
+        if (!dialog) return;
+        dialogTriggers.set(dialog, trigger);
+        if (!dialog.open) {
+          if (typeof dialog.showModal === 'function') {
+            dialog.showModal();
+          } else {
+            dialog.setAttribute('open', '');
+          }
+        }
+        window.requestAnimationFrame(() => {
+          const closeButton = dialog.querySelector('.dialog-close');
+          if (closeButton) closeButton.focus();
+        });
+      }
+
+      function closeDialog(dialog) {
+        if (!dialog) return;
+        if (dialog.open && typeof dialog.close === 'function') {
+          dialog.close();
+        } else {
+          dialog.removeAttribute('open');
+        }
+        restoreDialogFocus(dialog);
+      }
+
+      function setupDialog(dialog) {
+        if (!dialog) return;
+        const closeButton = dialog.querySelector('.dialog-close');
+        if (closeButton) closeButton.addEventListener('click', () => closeDialog(dialog));
+        dialog.addEventListener('cancel', event => {
+          event.preventDefault();
+          closeDialog(dialog);
+        });
+        dialog.addEventListener('click', event => {
+          if (event.target === dialog) closeDialog(dialog);
+        });
+        dialog.addEventListener('close', () => restoreDialogFocus(dialog));
+      }
+
+      function renderContactDialog(side) {
+        const dialog = document.getElementById('contact-dialog');
+        const content = dialog && dialog.querySelector('[data-contact-content]');
+        const person = WEDDING_CONFIG.couple[side];
+        if (!dialog || !content || !person) return null;
+
+        const list = element('div', 'contact-list');
+        [{ name: person.name, phone: person.phone }, ...person.parents].forEach(contact => {
+          if (!String(contact.phone || '').trim()) return;
+          const row = element('div', 'contact-row');
+          row.append(element('p', 'contact-name', contact.name));
+          const phone = element('a', 'contact-phone', contact.phone);
+          phone.href = WeddingUtils.telHref(contact.phone);
+          phone.setAttribute('aria-label', `${contact.name}에게 전화하기`);
+          row.append(phone);
+          list.append(row);
+        });
+        content.replaceChildren(list);
+        return dialog;
+      }
+
+      function updateGallery(nextIndex) {
+        const items = WEDDING_CONFIG.media.gallery;
+        const dialog = document.getElementById('lightbox-dialog');
+        const content = dialog && dialog.querySelector('[data-lightbox-content]');
+        if (!dialog || !content || !items.length) return;
+        galleryIndex = ((Number(nextIndex) % items.length) + items.length) % items.length;
+        const item = items[galleryIndex];
+        const alt = item.alt || `웨딩 사진 ${galleryIndex + 1}`;
+        content.replaceChildren(mediaFrame(item.src, alt, `Photo ${String(galleryIndex + 1).padStart(2, '0')}`));
+        dialog.setAttribute('aria-label', `${alt} 크게 보기`);
+      }
+
+      function setupLightbox() {
+        const dialog = document.getElementById('lightbox-dialog');
+        const inner = dialog && dialog.querySelector('.dialog-inner');
+        const closeButton = dialog && dialog.querySelector('.dialog-close');
+        if (!dialog || !inner || !closeButton) return;
+        const controls = element('div', 'lightbox-controls');
+        const previous = element('button', 'lightbox-control', '이전 사진');
+        previous.type = 'button';
+        previous.dataset.galleryDirection = '-1';
+        const next = element('button', 'lightbox-control', '다음 사진');
+        next.type = 'button';
+        next.dataset.galleryDirection = '1';
+        controls.append(previous, next);
+        inner.insertBefore(controls, closeButton);
+      }
+
+      async function shareInvitation() {
+        if (typeof navigator.share === 'function') {
+          try {
+            await navigator.share({
+              title: WEDDING_CONFIG.sharing.title,
+              text: WEDDING_CONFIG.sharing.text,
+              url: location.href,
+            });
+            announce('초대장을 공유했습니다.');
+          } catch (error) {
+            if (error && error.name === 'AbortError') return;
+            announce('초대장을 공유하지 못했습니다.');
+          }
+          return;
+        }
+
+        const copied = await copyText(location.href);
+        announce(copied ? '초대장 주소를 복사했습니다.' : '초대장 주소를 복사하지 못했습니다.');
+      }
+
+      function bindInteractions() {
+        setupDialog(document.getElementById('contact-dialog'));
+        setupDialog(document.getElementById('lightbox-dialog'));
+        setupLightbox();
+
+        document.addEventListener('click', async event => {
+          const trigger = event.target.closest('button, a');
+          if (!trigger) return;
+
+          if (trigger.dataset.contactSide) {
+            const dialog = renderContactDialog(trigger.dataset.contactSide);
+            if (dialog) openDialog(dialog, trigger);
+            return;
+          }
+
+          if (trigger.dataset.galleryIndex !== undefined) {
+            updateGallery(Number(trigger.dataset.galleryIndex));
+            openDialog(document.getElementById('lightbox-dialog'), trigger);
+            return;
+          }
+
+          if (trigger.dataset.galleryDirection) {
+            updateGallery(galleryIndex + Number(trigger.dataset.galleryDirection));
+            return;
+          }
+
+          const copyValue = trigger.dataset.copyAccount || trigger.dataset.copyAddress;
+          if (copyValue) {
+            const copied = await copyText(copyValue);
+            const label = trigger.dataset.copyAddress ? '주소' : '계좌번호';
+            announce(copied ? `${label}를 복사했습니다.` : `${label}를 복사하지 못했습니다.`);
+            return;
+          }
+
+          if (trigger.dataset.share !== undefined) await shareInvitation();
+        });
+      }
+
+      function initRevealMotion() {
+        const reveals = [...document.querySelectorAll('.reveal')];
+        const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reducedMotion || typeof window.IntersectionObserver !== 'function') {
+          reveals.forEach(node => node.classList.add('is-visible'));
+          return;
+        }
+
+        document.body.classList.add('has-reveal-motion');
+        const observer = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          });
+        }, { rootMargin: '0px 0px -8%', threshold: 0.08 });
+        reveals.forEach(node => observer.observe(node));
+      }
+
+      function scheduleIntroFallback() {
+        window.clearTimeout(introFallbackTimer);
+        const configuredDelay = Number(WEDDING_CONFIG.intro.fallbackDelayMs);
+        const delay = Number.isFinite(configuredDelay) ? Math.max(0, configuredDelay) : 0;
+        introFallbackTimer = window.setTimeout(() => finishIntro('media-error'), delay);
+      }
+
+      function handleIntroMediaError() {
+        if (introFinished) return;
+        const intro = document.getElementById('intro');
+        if (!intro) return;
+        intro.classList.add('has-media-error');
+        const skip = document.getElementById('intro-skip');
+        if (skip) skip.textContent = '청첩장 보기';
+        const status = intro.querySelector('[data-intro-status]');
+        if (status) status.textContent = `인트로 영상을 불러올 수 없습니다: ${WEDDING_CONFIG.intro.video}`;
+        scheduleIntroFallback();
+      }
+
+      function finishIntro(reason = 'complete') {
+        if (introFinished) return;
+        introFinished = true;
+        window.clearTimeout(introFallbackTimer);
+        window.clearTimeout(introRemovalTimer);
+        document.body.classList.remove('is-intro-open');
+
+        const intro = document.getElementById('intro');
+        const video = document.getElementById('intro-video');
+        const app = document.getElementById('invitation-app');
+        if (video) {
+          try {
+            video.pause();
+          } catch (error) {
+            // Media may already be unavailable; exiting must still continue.
+          }
+        }
+        if (!intro) {
+          if (app) app.focus({ preventScroll: true });
+          return;
+        }
+
+        intro.dataset.exitReason = reason;
+        intro.setAttribute('aria-hidden', 'true');
+        intro.classList.add('is-exiting');
+        if (app) app.focus({ preventScroll: true });
+
+        const removeIntro = () => {
+          window.clearTimeout(introRemovalTimer);
+          intro.removeEventListener('transitionend', onTransitionEnd);
+          intro.remove();
+        };
+        const onTransitionEnd = event => {
+          if (event.target === intro && event.propertyName === 'opacity') removeIntro();
+        };
+        intro.addEventListener('transitionend', onTransitionEnd);
+
+        const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reducedMotion) {
+          removeIntro();
+        } else {
+          introRemovalTimer = window.setTimeout(removeIntro, 700);
+        }
+      }
+
+      function renderIntro() {
+        if (WEDDING_CONFIG.sections.intro !== true) return;
+        const template = document.getElementById('intro-template');
+        const app = document.getElementById('invitation-app');
+        if (!template || !app) return;
+        introFinished = false;
+        app.before(template.content.cloneNode(true));
+        document.body.classList.add('is-intro-open');
+
+        const intro = document.getElementById('intro');
+        const video = document.getElementById('intro-video');
+        const skip = document.getElementById('intro-skip');
+        const sound = document.getElementById('intro-sound');
+        intro.querySelector('[data-intro-eyebrow]').textContent = WEDDING_CONFIG.intro.eyebrow;
+        intro.querySelector('[data-intro-title]').textContent = WEDDING_CONFIG.intro.title;
+
+        video.autoplay = true;
+        video.muted = Boolean(WEDDING_CONFIG.intro.muted);
+        video.defaultMuted = video.muted;
+        video.playsInline = true;
+        video.preload = 'auto';
+        if (String(WEDDING_CONFIG.intro.poster || '').trim()) video.poster = WEDDING_CONFIG.intro.poster;
+
+        const updateSoundControl = () => {
+          sound.textContent = video.muted ? 'SOUND ON' : 'SOUND OFF';
+          sound.setAttribute('aria-pressed', String(!video.muted));
+          sound.setAttribute('aria-label', video.muted ? '인트로 영상 소리 켜기' : '인트로 영상 소리 끄기');
+        };
+        updateSoundControl();
+
+        skip.addEventListener('click', () => finishIntro('skip'));
+        sound.addEventListener('click', () => {
+          video.muted = !video.muted;
+          updateSoundControl();
+        });
+        video.addEventListener('ended', () => finishIntro('ended'));
+        video.addEventListener('error', handleIntroMediaError);
+        document.addEventListener('keydown', event => {
+          if (event.key === 'Escape' && !introFinished) finishIntro('escape');
+        });
+
+        if (!String(WEDDING_CONFIG.intro.video || '').trim()) {
+          handleIntroMediaError();
+          return;
+        }
+        video.src = WEDDING_CONFIG.intro.video;
+        try {
+          const playResult = video.play();
+          if (playResult && typeof playResult.catch === 'function') playResult.catch(handleIntroMediaError);
+        } catch (error) {
+          handleIntroMediaError();
+        }
+      }
+
       function init() {
         applyTheme();
         renderSections();
+        bindInteractions();
+        initRevealMotion();
+        renderIntro();
       }
 
-      return { init, renderSections };
+      return { init, renderSections, finishIntro, openDialog, closeDialog, copyText };
     })());
 
     WeddingApp.init();

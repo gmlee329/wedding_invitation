@@ -110,3 +110,18 @@ test('outro reads its personal signature only from configuration', () => {
   assert.doesNotMatch(app, /Minjun & Seoyeon/);
   assert.match(app, /sectionShell\('outro', WEDDING_CONFIG\.messages\.signature,/);
 });
+
+test('intro and progressive enhancement contracts are present', () => {
+  const html = source();
+  const app = scriptById(html, 'wedding-app');
+  assert.match(app, /video\.autoplay\s*=\s*true/);
+  assert.match(app, /video\.muted\s*=/);
+  assert.match(app, /video\.playsInline\s*=\s*true/);
+  assert.match(html, />SKIP</);
+  assert.match(app, /addEventListener\(['"]ended['"]/);
+  assert.match(app, /addEventListener\(['"]error['"]/);
+  assert.match(app, /Escape/);
+  assert.match(app, /execCommand\(['"]copy['"]\)/);
+  assert.match(app, /navigator\.share/);
+  assert.match(app, /AbortError/);
+});
