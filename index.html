@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>김민준 ♥ 이서연 결혼식</title>
+  <script id="wedding-config">
+    const WEDDING_CONFIG = Object.freeze({
+      sections: { intro: true, hero: true, invitation: true, couple: true, schedule: true, story: true, gallery: true, location: true, transportation: true, notices: true, accounts: true, share: true, outro: true },
+      theme: { paper: '#f2efe8', ink: '#20211d', muted: '#77766f', sage: '#798071', bronze: '#9a765a', maxWidth: '460px' },
+      intro: { video: './assets/video/intro.mp4', poster: './assets/images/intro-poster.jpg', eyebrow: 'WEDDING INVITATION', title: 'LOVE OF LIFE', muted: true, fallbackDelayMs: 2800 },
+      couple: {
+        groom: { name: '김민준', englishName: 'MINJUN', phone: '010-1234-5678', parents: [{ relation: '아버지', name: '김아버지', phone: '010-1111-1111' }, { relation: '어머니', name: '박어머니', phone: '010-2222-2222' }] },
+        bride: { name: '이서연', englishName: 'SEOYEON', phone: '010-9876-5432', parents: [{ relation: '아버지', name: '이아버지', phone: '010-3333-3333' }, { relation: '어머니', name: '최어머니', phone: '010-4444-4444' }] },
+      },
+      wedding: { iso: '2026-10-24T12:30:00+09:00', dateKey: '2026-10-24', displayDate: '2026. 10. 24. SAT', displayTime: '오후 12시 30분', venue: '아르베 웨딩', hall: '그랜드 홀 · 3층', address: '서울특별시 강남구 테헤란로 123', phone: '02-1234-5678' },
+      messages: { hero: 'OUR STORY\nBEGINS HERE', invitationTitle: '소중한 분들을 초대합니다', invitation: ['서로의 하루를 아끼며', '같은 곳을 바라보게 된 두 사람이', '이제 한 가족이 되려 합니다.', '', '저희의 새로운 시작을', '따뜻한 마음으로 축복해 주세요.'], outro: ['장담하건대, 세상이 다 겨울이어도', '우리 사랑은 늘 봄처럼 따뜻할 것입니다.'], signature: 'With love, Minjun & Seoyeon' },
+      media: { hero: './assets/images/hero.jpg', map: './assets/images/map.jpg', gallery: Array.from({ length: 8 }, (_, index) => ({ src: `./assets/images/gallery-${String(index + 1).padStart(2, '0')}.jpg`, alt: `웨딩 사진 ${index + 1}` })) },
+      story: [{ year: '2020', label: '첫 만남', title: '우연처럼 시작된 우리', body: '평범했던 하루가 서로를 만나 특별해졌습니다.' }, { year: '2022', label: '여행', title: '같은 풍경을 바라보며', body: '수많은 계절과 여행 속에서 서로의 가장 편안한 사람이 되었습니다.' }, { year: '2026', label: '약속', title: '평생을 함께하기로', body: '앞으로의 모든 날을 함께 걷기로 약속했습니다.' }],
+      transportation: [{ title: '지하철', lines: ['2호선 역삼역 3번 출구에서 도보 5분'] }, { title: '버스', lines: ['간선 146, 341, 360', '지선 3412, 4312'] }, { title: '주차', lines: ['건물 지하 주차장 2시간 무료', '가급적 대중교통 이용을 부탁드립니다.'] }],
+      notices: [{ eyebrow: 'PHOTO BOOTH', title: '포토부스 이용 안내', body: '예식 당일 포토부스가 준비됩니다. 환한 미소와 따뜻한 메시지를 남겨주세요.' }, { eyebrow: 'FLOWER', title: '화환은 정중히 사양합니다', body: '축하해 주시는 마음만 감사히 받겠습니다.' }],
+      accounts: [{ side: '신랑측', holder: '김민준', bank: '신한은행', number: '110-123-456789' }, { side: '신랑측', holder: '김아버지', bank: '국민은행', number: '123456-01-123456' }, { side: '신부측', holder: '이서연', bank: '우리은행', number: '1002-123-456789' }, { side: '신부측', holder: '이아버지', bank: '하나은행', number: '123-456789-01234' }],
+      navigation: { naver: 'https://map.naver.com/', kakao: 'https://map.kakao.com/', tmap: 'https://www.tmap.co.kr/' },
+      sharing: { title: '김민준 ♥ 이서연 결혼식에 초대합니다', text: '2026년 10월 24일, 두 사람의 새로운 시작을 함께 축복해 주세요.' },
+    });
+  </script>
+  <style></style>
+</head>
+<body>
+  <script id="wedding-utils">
+    const WeddingUtils = Object.freeze((() => {
+      const DAY_MS = 24 * 60 * 60 * 1000;
+
+      function calendarCells(dateKey) {
+        const match = String(dateKey).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (!match) return [];
+        const year = Number(match[1]);
+        const month = Number(match[2]);
+        const weddingDay = Number(match[3]);
+        const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+        if (month < 1 || month > 12 || weddingDay < 1 || weddingDay > lastDay) return [];
+        const cells = Array(new Date(Date.UTC(year, month - 1, 1)).getUTCDay()).fill(null);
+        for (let day = 1; day <= lastDay; day += 1) {
+          cells.push({ day, isWedding: day === weddingDay });
+        }
+        while (cells.length % 7) cells.push(null);
+        return cells;
+      }
+
+      function countdownParts(targetMs, nowMs) {
+        const empty = { days: 0, hours: 0, minutes: 0, seconds: 0 };
+        if (!Number.isFinite(targetMs) || !Number.isFinite(nowMs)) return { state: 'invalid', ...empty };
+        const remaining = targetMs - nowMs;
+        if (remaining <= 0) {
+          return { state: remaining === 0 ? 'today' : 'after', ...empty };
+        }
+        return {
+          state: 'before',
+          days: Math.floor(remaining / DAY_MS),
+          hours: Math.floor((remaining % DAY_MS) / 3600000),
+          minutes: Math.floor((remaining % 3600000) / 60000),
+          seconds: Math.floor((remaining % 60000) / 1000),
+        };
+      }
+
+      function telHref(value) {
+        const raw = String(value || '').trim();
+        const prefix = raw.startsWith('+') ? '+' : '';
+        return `tel:${prefix}${raw.replace(/\D/g, '')}`;
+      }
+
+      function toLines(value) {
+        return Array.isArray(value) ? value.slice() : String(value || '').split(/\r?\n/);
+      }
+
+      return { calendarCells, countdownParts, telHref, toLines };
+    })());
+  </script>
+  <script id="wedding-app"></script>
+</body>
+</html>
