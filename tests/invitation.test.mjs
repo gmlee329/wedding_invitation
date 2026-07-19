@@ -76,3 +76,10 @@ test('countdownParts is deterministic before, on, and after the wedding', () => 
   assert.equal(utils.countdownParts(target, Date.parse('2026-10-25T00:00:00+09:00')).state, 'after');
   assert.equal(utils.countdownParts(Number.NaN, target).state, 'invalid');
 });
+
+test('countdownParts uses the Korea calendar date after the wedding time', () => {
+  const { WeddingUtils: utils } = loadContracts();
+  const target = Date.parse('2026-10-24T12:30:00+09:00');
+  assert.equal(utils.countdownParts(target, Date.parse('2026-10-24T18:00:00+09:00')).state, 'today');
+  assert.equal(utils.countdownParts(target, Date.parse('2026-10-25T00:00:00+09:00')).state, 'after');
+});

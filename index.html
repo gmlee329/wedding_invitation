@@ -30,6 +30,11 @@
   <script id="wedding-utils">
     const WeddingUtils = Object.freeze((() => {
       const DAY_MS = 24 * 60 * 60 * 1000;
+      const KOREA_OFFSET_MS = 9 * 60 * 60 * 1000;
+
+      function koreaDateKey(timeMs) {
+        return Math.floor((timeMs + KOREA_OFFSET_MS) / DAY_MS);
+      }
 
       function calendarCells(dateKey) {
         const match = String(dateKey).match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -52,7 +57,7 @@
         if (!Number.isFinite(targetMs) || !Number.isFinite(nowMs)) return { state: 'invalid', ...empty };
         const remaining = targetMs - nowMs;
         if (remaining <= 0) {
-          return { state: remaining === 0 ? 'today' : 'after', ...empty };
+          return { state: koreaDateKey(nowMs) === koreaDateKey(targetMs) ? 'today' : 'after', ...empty };
         }
         return {
           state: 'before',
