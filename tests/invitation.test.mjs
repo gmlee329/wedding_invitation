@@ -125,3 +125,22 @@ test('intro and progressive enhancement contracts are present', () => {
   assert.match(app, /navigator\.share/);
   assert.match(app, /AbortError/);
 });
+
+test('replaceable asset directories exist and every asset path is relative', () => {
+  assert.ok(existsSync(join(root, 'assets/images')));
+  assert.ok(existsSync(join(root, 'assets/video')));
+  const paths = source().match(/\.\/assets\/[A-Za-z0-9_./-]+/g) || [];
+  assert.ok(paths.length >= 4);
+  for (const assetPath of paths) {
+    assert.doesNotMatch(assetPath, /\.\.|\\\\/);
+    assert.ok(!assetPath.startsWith('/'));
+  }
+});
+
+test('inline runtime scripts and style block are syntactically self-contained', () => {
+  const html = source();
+  assert.equal((html.match(/<style(?:\s[^>]*)?>/g) || []).length, 1);
+  for (const id of ['wedding-config', 'wedding-utils', 'wedding-app']) {
+    assert.doesNotThrow(() => new vm.Script(scriptById(html, id), { filename: `${id}.js` }));
+  }
+});
