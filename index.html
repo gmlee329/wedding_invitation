@@ -690,13 +690,6 @@
       letter-spacing: 0.09em;
     }
 
-    .outro-signature {
-      margin: 18px 0 0;
-      color: var(--bronze);
-      font-family: var(--serif);
-      font-style: italic;
-    }
-
     dialog {
       width: min(calc(100% - 32px), 420px);
       max-height: calc(100dvh - 32px);
@@ -1192,7 +1185,7 @@
       }
 
       function renderOutro() {
-        const section = sectionShell('outro', 'Minjun & Seoyeon', '함께해 주셔서 감사합니다');
+        const section = sectionShell('outro', WEDDING_CONFIG.messages.signature, '함께해 주셔서 감사합니다');
         section.querySelector('.section-title').classList.add('visually-hidden');
         const body = sectionBody(section);
         const lines = element('div', 'outro-lines');
@@ -1200,7 +1193,6 @@
         body.append(
           lines,
           element('p', 'outro-meta', `${WEDDING_CONFIG.wedding.displayDate}\n${WEDDING_CONFIG.wedding.venue} · ${WEDDING_CONFIG.wedding.hall}`),
-          element('p', 'outro-signature', WEDDING_CONFIG.messages.signature),
         );
         return section;
       }

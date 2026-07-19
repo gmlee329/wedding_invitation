@@ -104,3 +104,9 @@ test('renderers provide a complete accessible document and media outline', () =>
   assert.match(app, /setAttribute\('scope', 'col'\)/);
   assert.match(app, /일요일/);
 });
+
+test('outro reads its personal signature only from configuration', () => {
+  const app = scriptById(source(), 'wedding-app');
+  assert.doesNotMatch(app, /Minjun & Seoyeon/);
+  assert.match(app, /sectionShell\('outro', WEDDING_CONFIG\.messages\.signature,/);
+});
