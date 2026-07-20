@@ -316,11 +316,25 @@ test('intro shares the paper texture and reveals an undimmed video without a sha
   assert.doesNotMatch(html, /class=["']intro-shade["']/);
   assert.doesNotMatch(html, /\.intro-shade\s*\{/);
   assert.doesNotMatch(html, /#171814|opacity:\s*0\.78|opacity:\s*0\.16/);
+  assert.match(html, /html\s*\{[^}]*background:\s*var\(--paper\)/);
+  assert.match(html, /body\s*\{[^}]*background:\s*var\(--paper\)/);
   assert.match(html, /\.invitation-page,\s*\.intro\s*\{[^}]*background-color:\s*var\(--paper\)/);
+  assert.match(html, /<div class="intro-stage">\s*<video[\s\S]*?<h1/);
+  assert.match(html, /\.intro-stage\s*\{[^}]*aspect-ratio:\s*4\s*\/\s*5/);
+  assert.match(html, /\.intro-video\s*\{[^}]*object-fit:\s*contain/);
+  assert.doesNotMatch(html, /\.intro-video\s*\{[^}]*inset:\s*0;[^}]*width:\s*100%;[^}]*height:\s*100%;[^}]*object-fit:\s*cover/);
   assert.match(html, /\.intro-video\s*\{[^}]*opacity:\s*0;[^}]*visibility:\s*hidden;/);
   assert.match(html, /\.intro\.is-video-playing \.intro-video\s*\{[^}]*opacity:\s*1;[^}]*visibility:\s*visible;/);
   assert.match(html, /font-family:\s*'Allura',\s*cursive/);
   assert.match(html, /\.intro-control\s*\{[^}]*background:\s*color-mix\(in srgb, var\(--paper\) 88%, transparent\)/);
+});
+
+test('hero copy and title use the configured script treatment', () => {
+  const html = source();
+  const { WEDDING_CONFIG: config } = loadContracts();
+
+  assert.equal(config.messages.hero, 'Happily Ever After');
+  assert.match(html, /\.hero-section \.section-title\s*\{[^}]*font-family:\s*'Allura',\s*cursive/);
 });
 
 test('configuration exposes every section toggle', () => {
