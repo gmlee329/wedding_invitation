@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>모바일 청첩장</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&amp;display=swap">
   <script id="wedding-config">
     const WEDDING_CONFIG = Object.freeze({
       sections: { intro: true, hero: true, invitation: true, couple: true, schedule: true, story: true, gallery: true, location: true, transportation: true, notices: true, accounts: true, share: true, outro: true },
@@ -11,7 +12,9 @@
       intro: {
         video: './assets/video/intro.mp4',
         poster: './assets/images/intro-poster.jpg',
-        names: '규민 ♡ 사라',
+        groomName: 'Gyumin',
+        connector: '&',
+        brideName: 'Sara',
         message: '결혼 여정을 시작합니다.',
         messageHoldMs: 1000,
         messageFadeMs: 600,
@@ -118,12 +121,8 @@
       outline-offset: 4px;
     }
 
-    .invitation-page {
-      position: relative;
-      width: 100%;
-      max-width: var(--page-width);
-      margin: 0 auto;
-      overflow: hidden;
+    .invitation-page,
+    .intro {
       background-color: var(--paper);
       background-image:
         radial-gradient(circle at 12% 18%, rgb(255 255 255 / 44%) 0 0.8px, transparent 1px),
@@ -131,6 +130,14 @@
         linear-gradient(115deg, rgb(255 255 255 / 12%), transparent 44%, rgb(154 118 90 / 4%));
       background-size: 13px 17px, 19px 23px, 100% 100%;
       isolation: isolate;
+    }
+
+    .invitation-page {
+      position: relative;
+      width: 100%;
+      max-width: var(--page-width);
+      margin: 0 auto;
+      overflow: hidden;
     }
 
     .invitation-page:focus {
@@ -144,10 +151,7 @@
       display: grid;
       overflow: hidden;
       place-items: center;
-      color: #f5f1e8;
-      background:
-        radial-gradient(circle at 50% 38%, rgb(121 128 113 / 42%), transparent 44%),
-        #171814;
+      color: var(--ink);
       opacity: 1;
       transition: opacity 520ms ease;
     }
@@ -163,21 +167,18 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      opacity: 0.78;
+      opacity: 0;
+      visibility: hidden;
     }
 
-    .intro.has-media-error .intro-video {
-      opacity: 0.16;
-    }
-
-    .intro-shade {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgb(15 16 13 / 32%), rgb(15 16 13 / 18%) 44%, rgb(15 16 13 / 76%));
+    .intro.is-video-playing .intro-video {
+      opacity: 1;
+      visibility: visible;
     }
 
     .intro-content {
       position: relative;
+      z-index: 1;
       display: grid;
       width: min(calc(100% - 48px), 420px);
       min-height: 100svh;
@@ -190,7 +191,6 @@
       display: grid;
       margin: 0;
       place-content: center;
-      gap: 14px;
       opacity: 1;
       transform: translateY(0);
       transition:
@@ -207,18 +207,26 @@
       visibility: hidden;
     }
 
-    .intro-names {
-      font-family: var(--serif);
-      font-size: clamp(1.65rem, 7vw, 2.35rem);
+    .intro-name {
+      font-family: 'Allura', cursive;
+      font-size: clamp(3.6rem, 18vw, 5.4rem);
       font-weight: 400;
-      letter-spacing: 0.04em;
-      line-height: 1.15;
+      line-height: 0.82;
+    }
+
+    .intro-connector {
+      margin: 10px 0 8px;
+      font-family: var(--serif);
+      font-size: 1.45rem;
+      font-weight: 400;
+      line-height: 1;
     }
 
     .intro-message {
-      font-size: 0.88rem;
+      margin-top: 30px;
+      font-size: 0.78rem;
       font-weight: 500;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       line-height: 1.6;
     }
 
@@ -234,13 +242,13 @@
       height: 1px;
       grid-column: 1 / -1;
       overflow: hidden;
-      background: rgb(255 255 255 / 30%);
+      background: color-mix(in srgb, var(--ink) 22%, transparent);
     }
 
     .intro-progress::after {
       position: absolute;
       inset: 0;
-      background: currentColor;
+      background: var(--ink);
       content: '';
       transform-origin: left;
       animation: intro-progress 8s linear infinite paused;
@@ -258,9 +266,9 @@
     .intro-control {
       min-width: 88px;
       padding: 8px 12px;
-      border: 1px solid rgb(255 255 255 / 48%);
-      color: inherit;
-      background: rgb(15 16 13 / 28%);
+      border: 1px solid color-mix(in srgb, var(--ink) 24%, transparent);
+      color: var(--ink);
+      background: color-mix(in srgb, var(--paper) 88%, transparent);
       cursor: pointer;
       font-size: 0.65rem;
       font-weight: 700;
@@ -1029,10 +1037,11 @@
   <template id="intro-template">
     <div id="intro" class="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title">
       <video id="intro-video" class="intro-video" muted playsinline preload="auto"></video>
-      <div class="intro-shade" aria-hidden="true"></div>
       <div class="intro-content">
         <h1 id="intro-title" class="intro-heading">
-          <span class="intro-names" data-intro-names></span>
+          <span class="intro-name" data-intro-groom></span>
+          <span class="intro-connector" data-intro-connector></span>
+          <span class="intro-name" data-intro-bride></span>
           <span class="intro-message" data-intro-message></span>
         </h1>
         <div class="intro-actions">
@@ -1848,13 +1857,18 @@
           finishIntro('missing-intro');
           return;
         }
-        const introNames = intro.querySelector('[data-intro-names]');
+        const introHeading = document.getElementById('intro-title');
+        const introGroom = intro.querySelector('[data-intro-groom]');
+        const introConnector = intro.querySelector('[data-intro-connector]');
+        const introBride = intro.querySelector('[data-intro-bride]');
         const introMessage = intro.querySelector('[data-intro-message]');
-        if (!introNames || !introMessage) {
+        if (!introHeading || !introGroom || !introConnector || !introBride || !introMessage) {
           finishIntro('missing-intro-copy');
           return;
         }
-        introNames.textContent = WEDDING_CONFIG.intro.names;
+        introGroom.textContent = WEDDING_CONFIG.intro.groomName;
+        introConnector.textContent = WEDDING_CONFIG.intro.connector;
+        introBride.textContent = WEDDING_CONFIG.intro.brideName;
         introMessage.textContent = WEDDING_CONFIG.intro.message;
 
         video.autoplay = false;
@@ -1897,8 +1911,7 @@
           introPlaybackTimer = 0;
           if (introFinished || document.getElementById('intro') !== intro) return;
           intro.classList.add('is-message-hidden');
-          introMessage.setAttribute('aria-hidden', 'true');
-          introNames.setAttribute('aria-hidden', 'true');
+          introHeading.setAttribute('aria-hidden', 'true');
           video.currentTime = 0;
           try {
             const playResult = video.play();

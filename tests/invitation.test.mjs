@@ -201,16 +201,21 @@ function createHarness({ now = Date.now(), introEnabled = true, names, reducedMo
   ids.set('intro-template', template);
 
   const intro = new FakeNode('div');
-  const introNames = new FakeNode('span');
-  introNames.dataset.introEyebrow = '';
-  introNames.dataset.introNames = '';
+  const introHeading = new FakeNode('h1');
+  const introGroom = new FakeNode('span');
+  introGroom.dataset.introGroom = '';
+  const introConnector = new FakeNode('span');
+  introConnector.dataset.introConnector = '';
+  const introBride = new FakeNode('span');
+  introBride.dataset.introBride = '';
   const introMessage = new FakeNode('span');
-  introMessage.dataset.introTitle = '';
   introMessage.dataset.introMessage = '';
+  introHeading.append(introGroom, introConnector, introBride, introMessage);
   const status = new FakeNode('p');
   status.dataset.introStatus = '';
-  intro.append(introNames, introMessage, status);
+  intro.append(introHeading, status);
   ids.set('intro', intro);
+  ids.set('intro-title', introHeading);
 
   const video = new FakeNode('video');
   const skip = new FakeNode('button');
@@ -283,7 +288,10 @@ function createHarness({ now = Date.now(), introEnabled = true, names, reducedMo
     clearedTimeouts,
     intro,
     video,
-    introNames,
+    introHeading,
+    introGroom,
+    introConnector,
+    introBride,
     introMessage,
     skip,
     setNow(value) {
@@ -292,13 +300,27 @@ function createHarness({ now = Date.now(), introEnabled = true, names, reducedMo
   };
 }
 
-test('runtime is one self-contained index without external code', () => {
+test('runtime is one index with only the approved font stylesheet', () => {
   const html = source();
   assert.match(html, /<script[^>]*id="wedding-config"/);
   assert.match(html, /<script[^>]*id="wedding-utils"/);
   assert.match(html, /<script[^>]*id="wedding-app"/);
   assert.doesNotMatch(html, /<script[^>]+src=/i);
-  assert.doesNotMatch(html, /<link[^>]+rel=["']stylesheet["']/i);
+  const stylesheets = html.match(/<link[^>]+rel=["']stylesheet["'][^>]*>/gi) || [];
+  assert.equal(stylesheets.length, 1);
+  assert.match(stylesheets[0], /https:\/\/fonts\.googleapis\.com\/css2\?family=Allura(?:&|&amp;)display=swap/);
+});
+
+test('intro shares the paper texture and reveals an undimmed video without a shade', () => {
+  const html = source();
+  assert.doesNotMatch(html, /class=["']intro-shade["']/);
+  assert.doesNotMatch(html, /\.intro-shade\s*\{/);
+  assert.doesNotMatch(html, /#171814|opacity:\s*0\.78|opacity:\s*0\.16/);
+  assert.match(html, /\.invitation-page,\s*\.intro\s*\{[^}]*background-color:\s*var\(--paper\)/);
+  assert.match(html, /\.intro-video\s*\{[^}]*opacity:\s*0;[^}]*visibility:\s*hidden;/);
+  assert.match(html, /\.intro\.is-video-playing \.intro-video\s*\{[^}]*opacity:\s*1;[^}]*visibility:\s*visible;/);
+  assert.match(html, /font-family:\s*'Allura',\s*cursive/);
+  assert.match(html, /\.intro-control\s*\{[^}]*background:\s*color-mix\(in srgb, var\(--paper\) 88%, transparent\)/);
 });
 
 test('configuration exposes every section toggle', () => {
@@ -393,9 +415,11 @@ test('schedule refreshes its countdown every second and stops after the before s
   assert.equal(afterSchedule.querySelector('.countdown-message').textContent, '함께 축복해 주셔서 감사합니다.');
 });
 
-test('intro renders configurable opening copy before delayed playback', () => {
+test('intro renders configurable signature before delayed playback', () => {
   const { WEDDING_CONFIG: config } = loadContracts();
-  assert.equal(config.intro.names, '규민 ♡ 사라');
+  assert.equal(config.intro.groomName, 'Gyumin');
+  assert.equal(config.intro.connector, '&');
+  assert.equal(config.intro.brideName, 'Sara');
   assert.equal(config.intro.message, '결혼 여정을 시작합니다.');
   assert.equal(config.intro.messageHoldMs, 1000);
   assert.equal(config.intro.messageFadeMs, 600);
@@ -403,10 +427,13 @@ test('intro renders configurable opening copy before delayed playback', () => {
   const harness = createHarness({ reducedMotion: false });
   harness.app.renderIntro();
 
-  assert.equal(harness.introNames.textContent, config.intro.names);
+  assert.equal(harness.introGroom.textContent, config.intro.groomName);
+  assert.equal(harness.introConnector.textContent, config.intro.connector);
+  assert.equal(harness.introBride.textContent, config.intro.brideName);
   assert.equal(harness.introMessage.textContent, config.intro.message);
   assert.equal(harness.video.autoplay, false);
   assert.equal(harness.video.playCalls, 0);
+  assert.equal(harness.intro.classList.contains('is-video-playing'), false);
 
   const hold = harness.timeouts.find(timeout => timeout.delay === 1000);
   assert.ok(hold);
@@ -418,7 +445,12 @@ test('intro renders configurable opening copy before delayed playback', () => {
   assert.ok(fade);
   fade.callback();
   assert.equal(harness.video.playCalls, 1);
-  assert.equal(harness.introMessage.getAttribute('aria-hidden'), 'true');
+  assert.equal(harness.introHeading.getAttribute('aria-hidden'), 'true');
+
+  const [handlePlaying] = harness.video.listeners.get('playing') || [];
+  assert.ok(handlePlaying);
+  handlePlaying();
+  assert.equal(harness.intro.classList.contains('is-video-playing'), true);
 });
 
 test('finishing during opening copy cancels delayed playback', () => {
