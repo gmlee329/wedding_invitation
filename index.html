@@ -7,7 +7,7 @@
   <script id="wedding-config">
     const WEDDING_CONFIG = Object.freeze({
       sections: { intro: true, hero: true, invitation: true, couple: true, schedule: true, story: true, gallery: true, location: true, transportation: true, notices: true, accounts: true, share: true, outro: true },
-      theme: { paper: '#fafafa', ink: '#252321', muted: '#77736d', sage: '#777f70', bronze: '#9d8069', maxWidth: '425px', transitionMs: 650 },
+      theme: { paper: '#fafafa', ink: '#252321', muted: '#77736d', sage: '#6d7566', bronze: '#866b56', maxWidth: '425px', transitionMs: 650 },
       intro: { video: './assets/video/intro.mp4', poster: './assets/images/intro-poster.jpg', eyebrow: 'WEDDING INVITATION', title: 'LOVE OF LIFE', mediaLabel: 'BEGIN OUR DAY', muted: true, fallbackDelayMs: 2800, objectPosition: '50% 50%' },
       couple: {
         groom: { name: '김민준', englishName: 'MINJUN', phone: '010-1234-5678', parents: [{ relation: '아버지', name: '김아버지', phone: '010-1111-1111' }, { relation: '어머니', name: '박어머니', phone: '010-2222-2222' }] },
@@ -37,8 +37,8 @@
       --paper: #fafafa;
       --ink: #252321;
       --muted: #77736d;
-      --sage: #777f70;
-      --bronze: #9d8069;
+      --sage: #6d7566;
+      --bronze: #866b56;
       --line: color-mix(in srgb, var(--ink) 13%, transparent);
       --transition-duration: 650ms;
       --media-ratio: 3 / 4;
@@ -136,13 +136,14 @@
       position: relative;
       width: 100%;
       max-width: var(--page-width);
+      min-height: 100svh;
       margin: 0 auto;
       overflow: hidden;
       isolation: isolate;
     }
 
-    .invitation-page:focus {
-      outline: none;
+    .invitation-page:focus-visible {
+      outline-offset: -4px;
     }
 
     .intro {
@@ -247,7 +248,7 @@
       z-index: 2;
       top: 24px;
       right: 20px;
-      min-height: 30px;
+      min-height: 44px;
       padding: 4px 12px;
       border: 0;
       border-radius: 8px;
@@ -258,7 +259,7 @@
     }
 
     .intro-sound {
-      min-height: 30px;
+      min-height: 44px;
       padding: 4px 0;
       border: 0;
       color: var(--ink);
@@ -1200,7 +1201,15 @@
         const frame = element('figure', 'media-frame');
         frame.dataset.media = String(src || '');
         const placeholder = element('span', 'media-placeholder', label || '사진을 준비하고 있습니다');
+        placeholder.setAttribute('aria-hidden', 'true');
         frame.append(placeholder);
+
+        const exposeFallbackDescription = () => {
+          const description = String(alt || '').trim();
+          if (!description) return;
+          frame.setAttribute('role', 'img');
+          frame.setAttribute('aria-label', description);
+        };
 
         if (String(src || '').trim()) {
           const image = element('img');
@@ -1213,11 +1222,13 @@
           image.addEventListener('error', () => {
             image.remove();
             frame.classList.add('has-media-error');
+            exposeFallbackDescription();
           }, { once: true });
           image.src = src;
           frame.append(image);
         } else {
           frame.classList.add('has-media-error');
+          exposeFallbackDescription();
         }
 
         return frame;
@@ -1731,11 +1742,10 @@
               url: location.href,
             });
             announce('초대장을 공유했습니다.');
+            return;
           } catch (error) {
             if (error && error.name === 'AbortError') return;
-            announce('초대장을 공유하지 못했습니다.');
           }
-          return;
         }
 
         const copied = await copyText(location.href);
@@ -1860,6 +1870,8 @@
         }
 
         intro.dataset.exitReason = reason;
+        intro.inert = true;
+        intro.setAttribute('inert', '');
         intro.setAttribute('aria-hidden', 'true');
         intro.classList.add('is-exiting');
         if (exitTarget) exitTarget.focus({ preventScroll: true });
