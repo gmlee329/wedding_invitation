@@ -320,10 +320,20 @@ test('intro shares the paper texture and reveals an undimmed video without a sha
   assert.match(html, /body\s*\{[^}]*background:\s*var\(--paper\)/);
   assert.match(html, /\.invitation-page,\s*\.intro\s*\{[^}]*background-color:\s*var\(--paper\)/);
   assert.match(html, /<div class="intro-stage">\s*<video[\s\S]*?<h1/);
-  assert.match(html, /\.intro-stage\s*\{[^}]*aspect-ratio:\s*4\s*\/\s*5/);
-  assert.match(html, /\.intro-video\s*\{[^}]*object-fit:\s*contain/);
-  assert.doesNotMatch(html, /\.intro-video\s*\{[^}]*inset:\s*0;[^}]*width:\s*100%;[^}]*height:\s*100%;[^}]*object-fit:\s*cover/);
-  assert.match(html, /\.intro-video\s*\{[^}]*opacity:\s*0;[^}]*visibility:\s*hidden;/);
+  const introStageRule = html.match(/\.intro-stage\s*\{([^}]*)\}/);
+  assert.ok(introStageRule, 'missing .intro-stage rule');
+  assert.match(introStageRule[1], /position:\s*relative/);
+  assert.match(introStageRule[1], /aspect-ratio:\s*4\s*\/\s*5/);
+  assert.match(introStageRule[1], /overflow:\s*hidden/);
+
+  const introVideoRule = html.match(/\.intro-video\s*\{([^}]*)\}/);
+  assert.ok(introVideoRule, 'missing .intro-video rule');
+  assert.match(introVideoRule[1], /object-fit:\s*contain/);
+  assert.doesNotMatch(introVideoRule[1], /object-fit:\s*cover/);
+  assert.match(introVideoRule[1], /opacity:\s*0/);
+  assert.match(introVideoRule[1], /visibility:\s*hidden/);
+  assert.doesNotMatch(introVideoRule[1], /\bfilter\s*:/);
+  assert.doesNotMatch(introVideoRule[1], /\bbackground(?:-color|-image)?\s*:/);
   assert.match(html, /\.intro\.is-video-playing \.intro-video\s*\{[^}]*opacity:\s*1;[^}]*visibility:\s*visible;/);
   assert.match(html, /font-family:\s*'Allura',\s*cursive/);
   assert.match(html, /\.intro-control\s*\{[^}]*background:\s*color-mix\(in srgb, var\(--paper\) 88%, transparent\)/);
