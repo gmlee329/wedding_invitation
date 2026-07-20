@@ -555,7 +555,7 @@ test('responsive and reduced-motion safeguards remain in the single-file page', 
   assert.match(html, /\.invitation-page\s*\{[\s\S]*width:\s*100%;[\s\S]*max-width:\s*var\(--page-width\)/);
   assert.match(html, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
   assert.match(html, /transition-duration:\s*0\.01ms\s*!important/);
-  assert.doesNotMatch(html, /(?:src|href)=["']\/(?!\/)/);
+  assert.doesNotMatch(html, /\b(?:src|href)\s*=\s*["']\/(?!\/)/i);
 });
 
 test('font CDN failure cannot remove local content or require external JavaScript', () => {
@@ -582,7 +582,7 @@ test('lower-page interaction and responsive layout hooks remain intact', () => {
   for (const hook of ['copyAddress', 'copyAccount', 'galleryIndex', 'share']) {
     assert.match(app, new RegExp(`dataset\\.${hook}`));
   }
-  assert.match(html, /\.address-copy-button\s*\{[\s\S]*?display:\s*flex;[\s\S]*?margin:\s*10px auto 22px;/);
+  assert.match(html, /\.address-copy-button\s*\{[\s\S]*?display:\s*flex;[\s\S]*?width:\s*fit-content;[\s\S]*?justify-content:\s*center;[\s\S]*?margin:\s*10px auto 22px;/);
   assert.match(html, /\.transport-item\s*\{[\s\S]*?grid-template-columns:\s*88px 1fr;/);
   assert.match(html, /\.map-media\s*\{[\s\S]*?aspect-ratio:\s*4\s*\/\s*3;/);
 });
