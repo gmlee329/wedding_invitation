@@ -992,6 +992,7 @@
     }
 
     .address-copy-button {
+      display: flex;
       margin: 10px auto 22px;
       padding: 8px 16px;
       border: 1px solid var(--line);
@@ -1227,7 +1228,11 @@
         const header = element('header', 'section-header');
         const enabledKeys = Object.keys(SECTION_RENDERERS).filter(name => WEDDING_CONFIG.sections[name] === true);
         const ordinal = enabledKeys.indexOf(key) + 1;
-        if (ordinal > 0) header.append(element('span', 'section-index', String(ordinal).padStart(2, '0')));
+        if (ordinal > 0) {
+          const index = element('span', 'section-index', String(ordinal).padStart(2, '0'));
+          index.setAttribute('aria-hidden', 'true');
+          header.append(index);
+        }
         if (eyebrow) header.append(element('p', 'section-eyebrow', eyebrow));
         if (title) header.append(element(headingTag, 'section-title', title));
         const body = element('div', 'section-body');

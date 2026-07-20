@@ -549,6 +549,44 @@ test('replaceable asset directories exist and every asset path is relative', () 
   }
 });
 
+test('responsive and reduced-motion safeguards remain in the single-file page', () => {
+  const html = source();
+  assert.match(html, /body\s*\{[\s\S]*min-width:\s*320px;[\s\S]*overflow-x:\s*hidden;/);
+  assert.match(html, /\.invitation-page\s*\{[\s\S]*width:\s*100%;[\s\S]*max-width:\s*var\(--page-width\)/);
+  assert.match(html, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
+  assert.match(html, /transition-duration:\s*0\.01ms\s*!important/);
+  assert.doesNotMatch(html, /(?:src|href)=["']\/(?!\/)/);
+});
+
+test('font CDN failure cannot remove local content or require external JavaScript', () => {
+  const html = source();
+  assert.doesNotMatch(html, /<script[^>]+src=/i);
+  assert.match(html, /--display:[^;]*Georgia/);
+  assert.match(html, /--korean:[^;]*Apple SD Gothic Neo/);
+  assert.match(html, /--ui:[^;]*-apple-system/);
+  const assetPaths = html.match(/\.\/assets\/[A-Za-z0-9_./-]+/g) || [];
+  assert.ok(assetPaths.every(path => !path.includes('..')));
+});
+
+test('decorative section ordinals stay hidden from assistive technology', () => {
+  const harness = createHarness({ introEnabled: false });
+  harness.app.renderSections();
+  const ordinal = harness.appNode.querySelector('.section-index');
+  assert.ok(ordinal);
+  assert.equal(ordinal.getAttribute('aria-hidden'), 'true');
+});
+
+test('lower-page interaction and responsive layout hooks remain intact', () => {
+  const html = source();
+  const app = scriptById(html, 'wedding-app');
+  for (const hook of ['copyAddress', 'copyAccount', 'galleryIndex', 'share']) {
+    assert.match(app, new RegExp(`dataset\\.${hook}`));
+  }
+  assert.match(html, /\.address-copy-button\s*\{[\s\S]*?display:\s*flex;[\s\S]*?margin:\s*10px auto 22px;/);
+  assert.match(html, /\.transport-item\s*\{[\s\S]*?grid-template-columns:\s*88px 1fr;/);
+  assert.match(html, /\.map-media\s*\{[\s\S]*?aspect-ratio:\s*4\s*\/\s*3;/);
+});
+
 test('inline runtime scripts and style block are syntactically self-contained', () => {
   const html = source();
   assert.equal((html.match(/<style(?:\s[^>]*)?>/g) || []).length, 1);
