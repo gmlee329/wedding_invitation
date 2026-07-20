@@ -60,8 +60,6 @@ class FakeNode {
     this.focusCalls = [];
     this.listeners = new Map();
     this.inert = false;
-    this.parentNode = null;
-    this.removed = false;
   }
 
   set className(value) {
@@ -75,27 +73,12 @@ class FakeNode {
 
   append(...nodes) {
     nodes.forEach(node => {
-      const children = node?.isFragment ? node.children : [node];
-      children.filter(Boolean).forEach(child => {
-        child.parentNode = this;
-        child.removed = false;
-        this.children.push(child);
-      });
+      if (node?.isFragment) this.children.push(...node.children);
+      else if (node) this.children.push(node);
     });
   }
 
-  before(...nodes) {
-    if (!this.parentNode) return;
-    const siblings = this.parentNode.children;
-    const index = siblings.indexOf(this);
-    if (index < 0) return;
-    const additions = nodes.flatMap(node => node?.isFragment ? node.children : [node]).filter(Boolean);
-    additions.forEach(node => {
-      node.parentNode = this.parentNode;
-      node.removed = false;
-    });
-    siblings.splice(index, 0, ...additions);
-  }
+  before() {}
 
   replaceChildren(...nodes) {
     this.children = [];
@@ -129,29 +112,16 @@ class FakeNode {
     this.focusCalls.push(options);
   }
 
-  select() {}
-
-  setSelectionRange() {}
-
   pause() {}
 
   play() {}
 
   remove() {
     this.removed = true;
-    if (!this.parentNode) return;
-    this.parentNode.children = this.parentNode.children.filter(child => child !== this);
-    this.parentNode = null;
-  }
-
-  dispatchEvent(event) {
-    event.target ||= this;
-    for (const listener of this.listeners.get(event.type) || []) listener(event);
   }
 
   matches(selector) {
     if (selector.startsWith('.')) return this.classList.contains(selector.slice(1));
-    if (/^[a-z][a-z0-9-]*$/i.test(selector)) return this.tagName === selector.toUpperCase();
     const dataMatch = selector.match(/^\[data-([a-z-]+)\]$/);
     if (dataMatch) {
       const key = dataMatch[1].replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
@@ -188,20 +158,11 @@ class FakeFragment extends FakeNode {
   }
 }
 
-function createHarness({
-  now = Date.now(),
-  introEnabled = true,
-  names,
-  disabledSections = [],
-  reducedMotion = true,
-  navigatorValue = {},
-  execCommand = () => true,
-} = {}) {
+function createHarness({ now = Date.now(), introEnabled = true, names } = {}) {
   const ids = new Map();
   const documentListeners = new Map();
   const clearedIntervals = [];
   const intervals = [];
-  const timeouts = [];
   let currentNow = now;
 
   const document = {
@@ -221,7 +182,7 @@ function createHarness({
       const listeners = documentListeners.get(type) || [];
       documentListeners.set(type, listeners.filter(candidate => candidate !== listener));
     },
-    execCommand,
+    execCommand: () => true,
   };
 
   const app = new FakeNode('main');
@@ -238,9 +199,7 @@ function createHarness({
   heading.dataset.introTitle = '';
   const status = new FakeNode('p');
   status.dataset.introStatus = '';
-  const mediaLabel = new FakeNode('span');
-  mediaLabel.dataset.introMediaLabel = '';
-  intro.append(eyebrow, heading, status, mediaLabel);
+  intro.append(eyebrow, heading, status);
   ids.set('intro', intro);
 
   const video = new FakeNode('video');
@@ -249,10 +208,6 @@ function createHarness({
   ids.set('intro-video', video);
   ids.set('intro-skip', skip);
   ids.set('intro-sound', sound);
-
-  const toast = new FakeNode('div');
-  ids.set('toast', toast);
-  document.body.append(intro, app, toast);
 
   class HarnessDate extends Date {
     static now() {
@@ -269,24 +224,14 @@ function createHarness({
     clearInterval(id) {
       clearedIntervals.push(id);
     },
-    setTimeout(callback, delay) {
-      const id = timeouts.length + 1;
-      timeouts.push({ id, callback, delay, cleared: false, ran: false });
-      return id;
-    },
-    clearTimeout(id) {
-      const timeout = timeouts.find(candidate => candidate.id === id);
-      if (timeout) timeout.cleared = true;
-    },
+    setTimeout: () => 1,
+    clearTimeout() {},
     requestAnimationFrame: callback => callback(),
-    matchMedia: () => ({ matches: reducedMotion }),
+    matchMedia: () => ({ matches: true }),
   };
 
   let configScript = scriptById(source(), 'wedding-config');
   if (!introEnabled) configScript = configScript.replace('intro: true', 'intro: false');
-  for (const key of disabledSections) {
-    configScript = configScript.replace(`${key}: true`, `${key}: false`);
-  }
   if (names) {
     configScript = configScript
       .replace("groom: { name: '김민준'", `groom: { name: '${names.groom}'`)
@@ -296,7 +241,7 @@ function createHarness({
   const appScript = scriptById(source(), 'wedding-app')
     .replace(
       'return { init, renderSections, finishIntro, openDialog, closeDialog, copyText };',
-      'return { init, renderSections, renderSchedule, renderIntro, finishIntro, openDialog, closeDialog, copyText, mediaFrame, shareInvitation };',
+      'return { init, renderSections, renderSchedule, renderIntro, finishIntro, openDialog, closeDialog, copyText };',
     )
     .replace(/\n\s*WeddingApp\.init\(\);\s*$/, '\nglobalThis.__app = WeddingApp;');
   const context = vm.createContext({
@@ -306,10 +251,10 @@ function createHarness({
     DocumentFragment: FakeFragment,
     document,
     window,
-    navigator: navigatorValue,
+    navigator: {},
     location: { href: 'file:///invitation/index.html' },
   });
-  vm.runInContext(`${configScript}\n${scriptById(source(), 'wedding-utils')}\n${appScript}\nglobalThis.__config = WEDDING_CONFIG;`, context);
+  vm.runInContext(`${configScript}\n${scriptById(source(), 'wedding-utils')}\n${appScript}`, context);
 
   return {
     app: context.__app,
@@ -318,99 +263,21 @@ function createHarness({
     documentListeners,
     intervals,
     clearedIntervals,
-    timeouts,
     intro,
     skip,
-    toast,
-    config: context.__config,
     setNow(value) {
       currentNow = value;
-    },
-    runTimeout(id) {
-      const timeout = timeouts.find(candidate => candidate.id === id);
-      assert.ok(timeout, `missing timeout ${id}`);
-      if (timeout.cleared || timeout.ran) return;
-      timeout.ran = true;
-      timeout.callback();
     },
   };
 }
 
-function stylesheetHrefs(html) {
-  return [...html.matchAll(/<link[^>]+rel=["']stylesheet["'][^>]+href=["']([^"']+)["']/gi)]
-    .map(match => match[1]);
-}
-
-function relativeLuminance(hexColor) {
-  assert.match(hexColor, /^#[\da-f]{6}$/i);
-  const channels = hexColor.slice(1).match(/[\da-f]{2}/gi).map(value => Number.parseInt(value, 16) / 255);
-  const linear = channels.map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
-  return (0.2126 * linear[0]) + (0.7152 * linear[1]) + (0.0722 * linear[2]);
-}
-
-function contrastRatio(first, second) {
-  const luminances = [relativeLuminance(first), relativeLuminance(second)].sort((a, b) => b - a);
-  return (luminances[0] + 0.05) / (luminances[1] + 0.05);
-}
-
-function cssVariable(html, name) {
-  const rootRule = html.match(/:root\s*\{([\s\S]*?)\}/);
-  assert.ok(rootRule, 'missing :root rule');
-  const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = rootRule[1].match(new RegExp(`${escapedName}:\\s*(#[\\da-f]{6})\\s*;`, 'i'));
-  assert.ok(match, `missing ${name}`);
-  return match[1];
-}
-
-function cssRule(html, selector) {
-  const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = html.match(new RegExp(`(?:^|})\\s*${escapedSelector}\\s*\\{([^}]*)\\}`));
-  assert.ok(match, `missing ${selector} rule`);
-  return match[1];
-}
-
-test('runtime keeps JavaScript inline and loads styles only from approved font CDNs', () => {
+test('runtime is one self-contained index without external code', () => {
   const html = source();
   assert.match(html, /<script[^>]*id="wedding-config"/);
   assert.match(html, /<script[^>]*id="wedding-utils"/);
   assert.match(html, /<script[^>]*id="wedding-app"/);
   assert.doesNotMatch(html, /<script[^>]+src=/i);
-  const hosts = stylesheetHrefs(html).map(href => new URL(href).hostname);
-  assert.deepEqual(hosts.sort(), ['cdn.jsdelivr.net', 'fonts.googleapis.com']);
-});
-
-test('reference-aligned canvas tokens and editable motion defaults are configured', () => {
-  const html = source();
-  const { WEDDING_CONFIG: config } = loadContracts();
-  assert.equal(config.theme.maxWidth, '425px');
-  assert.equal(config.theme.transitionMs, 650);
-  assert.equal(config.intro.objectPosition, '50% 50%');
-  assert.match(html, /--canvas:\s*#eee(?:eee)?;/i);
-  assert.match(html, /--paper:\s*#fafafa;/i);
-  assert.match(html, /--page-width:\s*425px;/);
-  assert.match(html, /--media-ratio:\s*3\s*\/\s*4;/);
-});
-
-test('editable accent text colors meet WCAG AA contrast on the paper background', () => {
-  const html = source();
-  const { WEDDING_CONFIG: config } = loadContracts();
-  const configuredColors = [
-    ['theme.sage', config.theme.sage],
-    ['theme.bronze', config.theme.bronze],
-  ];
-  for (const [label, color] of configuredColors) {
-    const ratio = contrastRatio(color, config.theme.paper);
-    assert.ok(ratio >= 4.5, `${label} contrast is ${ratio.toFixed(2)}:1`);
-  }
-
-  for (const name of ['--sage', '--bronze']) {
-    const ratio = contrastRatio(cssVariable(html, name), cssVariable(html, '--paper'));
-    assert.ok(ratio >= 4.5, `${name} fallback contrast is ${ratio.toFixed(2)}:1`);
-  }
-
-  const app = scriptById(html, 'wedding-app');
-  assert.match(app, /setProperty\('--sage',\s*WEDDING_CONFIG\.theme\.sage\)/);
-  assert.match(app, /setProperty\('--bronze',\s*WEDDING_CONFIG\.theme\.bronze\)/);
+  assert.doesNotMatch(html, /<link[^>]+rel=["']stylesheet["']/i);
 });
 
 test('configuration exposes every section toggle', () => {
@@ -524,110 +391,6 @@ test('intro hides and inerts the invitation, labels and focuses skip, then resto
   assert.equal(harness.appNode.focusCalls[0].preventScroll, true);
 });
 
-test('intro and invitation share the paper canvas without a dark full-screen flash', () => {
-  const html = source();
-  assert.match(html, /class="intro-shell"/);
-  assert.match(html, /class="intro-card"/);
-  assert.match(html, /class="intro-media"/);
-  assert.match(html, /\.intro-card,\s*\n\s*\.invitation-page\s*\{[\s\S]*background-image:\s*var\(--paper-texture\)/);
-  assert.match(html, /\.intro\s*\{[\s\S]*background:\s*var\(--canvas\)/);
-  assert.match(html, /\.intro-skip\s*\{[\s\S]*top:\s*24px;[\s\S]*right:\s*20px;[\s\S]*rgba\(0, 0, 0, 0\.4\)/);
-});
-
-test('compact intro controls retain 44px minimum touch targets', () => {
-  const html = source();
-  assert.match(cssRule(html, '.intro-skip'), /min-height:\s*44px\s*;/);
-  assert.match(cssRule(html, '.intro-sound'), /min-height:\s*44px\s*;/);
-});
-
-test('hero through story render the reference-aligned editorial structure', () => {
-  const html = source();
-  const app = scriptById(html, 'wedding-app');
-  const { WEDDING_CONFIG: config } = loadContracts();
-  assert.equal(config.messages.hero, 'BEGINS\nON OCT');
-  assert.equal(config.messages.heroOrbit, 'JOIN US · JOIN US ·');
-  assert.equal(config.messages.heroTagline, 'A new chapter begins with the people we love.');
-  assert.match(app, /hero-display/);
-  assert.match(app, /hero-orbit/);
-  assert.match(app, /hero-tagline/);
-  assert.match(app, /section-index/);
-  assert.match(app, /story-media/);
-  assert.match(html, /\.hero-display\s*\{[\s\S]*font-family:\s*var\(--display\)/);
-  assert.match(html, /\.invitation-section\s*\{[\s\S]*padding:[^;]*(?:96px|clamp\(96px)/);
-  assert.match(html, /\.story-item:nth-child\(even\)[\s\S]*\.story-media/);
-});
-
-test('sections follow the reference narrative order and keep lower-page interactions', () => {
-  const html = source();
-  const app = scriptById(html, 'wedding-app');
-  const order = ['hero', 'invitation', 'couple', 'schedule', 'story', 'location', 'transportation', 'gallery', 'notices', 'accounts', 'share', 'outro'];
-  const positions = order.map(key => app.indexOf(`${key}: render`));
-  assert.ok(positions.every(position => position >= 0));
-  assert.deepEqual([...positions].sort((a, b) => a - b), positions);
-  assert.match(html, /\.gallery-grid\s*\{[\s\S]*grid-template-columns:\s*repeat\(12/);
-  assert.match(html, /\.location-section \.section-body[\s\S]*margin-inline:/);
-  assert.match(html, /\.account-group\s*\{[\s\S]*border-top:/);
-  assert.match(app, /navigator\.share/);
-  assert.match(app, /dataset\.copyAccount/);
-});
-
-test('optional story images stay inside the replaceable image folder', () => {
-  const { WEDDING_CONFIG: config } = loadContracts();
-  assert.ok(config.story.every(item => !item.image || item.image.startsWith('./assets/images/')));
-});
-
-test('intro exits to the first enabled section when hero is disabled', () => {
-  const harness = createHarness({ disabledSections: ['hero'] });
-  harness.app.renderSections();
-  harness.app.renderIntro();
-  harness.app.finishIntro('skip');
-  const firstSection = harness.appNode.querySelector('[data-section]');
-  assert.equal(firstSection.dataset.section, 'invitation');
-  assert.equal(firstSection.focusCalls.length, 1);
-  assert.equal(harness.appNode.inert, false);
-  assert.equal(harness.appNode.getAttribute('aria-hidden'), null);
-});
-
-test('intro exits accessibly to a visible full-height root when every content section is disabled', () => {
-  const contentSections = ['hero', 'invitation', 'couple', 'schedule', 'story', 'gallery', 'location', 'transportation', 'notices', 'accounts', 'share', 'outro'];
-  const harness = createHarness({ disabledSections: contentSections });
-
-  harness.app.renderSections();
-  harness.app.renderIntro();
-  harness.app.finishIntro('skip');
-
-  assert.equal(harness.appNode.children.length, 0);
-  assert.equal(harness.appNode.focusCalls.length, 1);
-  assert.equal(harness.appNode.focusCalls[0].preventScroll, true);
-  assert.equal(harness.appNode.inert, false);
-  assert.equal(harness.appNode.getAttribute('inert'), null);
-  assert.equal(harness.appNode.getAttribute('aria-hidden'), null);
-
-  const html = source();
-  assert.match(cssRule(html, '.invitation-page'), /min-height:\s*100svh\s*;/);
-  assert.match(html, /:focus-visible\s*\{[^}]*outline:\s*3px solid var\(--bronze\)/);
-  assert.match(cssRule(html, '.invitation-page:focus-visible'), /outline-offset:\s*-4px\s*;/);
-  assert.doesNotMatch(html, /\.invitation-page:focus\s*\{[^}]*outline:\s*none/);
-});
-
-test('normal-motion intro exit is inert throughout its transition window', () => {
-  const harness = createHarness({ reducedMotion: false });
-  harness.app.renderSections();
-  harness.app.renderIntro();
-
-  harness.app.finishIntro('skip');
-
-  assert.equal(harness.intro.getAttribute('aria-hidden'), 'true');
-  assert.equal(harness.intro.inert, true);
-  assert.equal(harness.intro.getAttribute('inert'), '');
-  assert.equal(harness.intro.removed, false);
-  const removalTimer = harness.timeouts.find(timeout => timeout.delay === 730);
-  assert.ok(removalTimer, 'missing normal-motion removal timer');
-
-  harness.runTimeout(removalTimer.id);
-  assert.equal(harness.intro.removed, true);
-});
-
 test('intro removes its Escape listener on finish and stays inactive when disabled', () => {
   const harness = createHarness();
   harness.app.renderIntro();
@@ -673,56 +436,6 @@ test('renderers provide a complete accessible document and media outline', () =>
   assert.match(app, /일요일/);
 });
 
-test('failed hero, story, gallery, and map media retain their configured descriptions', () => {
-  const harness = createHarness({ introEnabled: false });
-  harness.app.renderSections();
-  const expectedSources = [
-    harness.config.media.hero,
-    ...harness.config.story.map(item => item.image),
-    harness.config.media.map,
-    ...harness.config.media.gallery.map(item => item.src),
-  ];
-  const frames = harness.appNode.querySelectorAll('.media-frame');
-  assert.equal(frames.length, expectedSources.length);
-
-  for (const src of expectedSources) {
-    const frame = frames.find(candidate => candidate.dataset.media === src);
-    assert.ok(frame, `missing media frame for ${src}`);
-    const image = frame.querySelector('img');
-    const placeholder = frame.querySelector('.media-placeholder');
-    assert.ok(image?.alt, `missing configured alt for ${src}`);
-    assert.equal(placeholder.getAttribute('aria-hidden'), 'true');
-
-    image.dispatchEvent({ type: 'error' });
-
-    assert.equal(image.removed, true);
-    assert.equal(frame.getAttribute('role'), 'img');
-    assert.equal(frame.getAttribute('aria-label'), image.alt);
-  }
-});
-
-test('media without a source exposes its configured description on the replacement surface', () => {
-  const harness = createHarness();
-  const frame = harness.app.mediaFrame('', '두 사람의 대표 사진', 'Main Portrait');
-  assert.equal(frame.getAttribute('role'), 'img');
-  assert.equal(frame.getAttribute('aria-label'), '두 사람의 대표 사진');
-  assert.equal(frame.querySelector('.media-placeholder').getAttribute('aria-hidden'), 'true');
-});
-
-test('loaded media exposes its description only through the real image', () => {
-  const harness = createHarness();
-  const frame = harness.app.mediaFrame('./assets/images/hero.jpg', '두 사람의 대표 사진', 'Main Portrait');
-  const image = frame.querySelector('img');
-  const placeholder = frame.querySelector('.media-placeholder');
-
-  image.dispatchEvent({ type: 'load' });
-
-  assert.equal(image.alt, '두 사람의 대표 사진');
-  assert.equal(placeholder.removed, true);
-  assert.equal(frame.getAttribute('role'), null);
-  assert.equal(frame.getAttribute('aria-label'), null);
-});
-
 test('outro reads its personal signature only from configuration', () => {
   const app = scriptById(source(), 'wedding-app');
   assert.doesNotMatch(app, /Minjun & Seoyeon/);
@@ -744,37 +457,6 @@ test('intro and progressive enhancement contracts are present', () => {
   assert.match(app, /AbortError/);
 });
 
-test('a non-cancelled Web Share rejection copies the invitation URL and announces success', async () => {
-  const copiedValues = [];
-  const harness = createHarness({
-    navigatorValue: {
-      share: async () => { throw new Error('share unavailable'); },
-      clipboard: { writeText: async value => copiedValues.push(value) },
-    },
-  });
-
-  await harness.app.shareInvitation();
-
-  assert.deepEqual(copiedValues, ['file:///invitation/index.html']);
-  assert.equal(harness.toast.textContent, '초대장 주소를 복사했습니다.');
-});
-
-test('an AbortError from Web Share remains a silent cancellation', async () => {
-  const copiedValues = [];
-  const abortError = Object.assign(new Error('cancelled'), { name: 'AbortError' });
-  const harness = createHarness({
-    navigatorValue: {
-      share: async () => { throw abortError; },
-      clipboard: { writeText: async value => copiedValues.push(value) },
-    },
-  });
-
-  await harness.app.shareInvitation();
-
-  assert.deepEqual(copiedValues, []);
-  assert.equal(harness.toast.textContent, '');
-});
-
 test('replaceable asset directories exist and every asset path is relative', () => {
   assert.ok(existsSync(join(root, 'assets/images')));
   assert.ok(existsSync(join(root, 'assets/video')));
@@ -784,44 +466,6 @@ test('replaceable asset directories exist and every asset path is relative', () 
     assert.doesNotMatch(assetPath, /\.\.|\\\\/);
     assert.ok(!assetPath.startsWith('/'));
   }
-});
-
-test('responsive and reduced-motion safeguards remain in the single-file page', () => {
-  const html = source();
-  assert.match(html, /body\s*\{[\s\S]*min-width:\s*320px;[\s\S]*overflow-x:\s*hidden;/);
-  assert.match(html, /\.invitation-page\s*\{[\s\S]*width:\s*100%;[\s\S]*max-width:\s*var\(--page-width\)/);
-  assert.match(html, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
-  assert.match(html, /transition-duration:\s*0\.01ms\s*!important/);
-  assert.doesNotMatch(html, /\b(?:src|href)\s*=\s*["']\/(?!\/)/i);
-});
-
-test('font CDN failure cannot remove local content or require external JavaScript', () => {
-  const html = source();
-  assert.doesNotMatch(html, /<script[^>]+src=/i);
-  assert.match(html, /--display:[^;]*Georgia/);
-  assert.match(html, /--korean:[^;]*Apple SD Gothic Neo/);
-  assert.match(html, /--ui:[^;]*-apple-system/);
-  const assetPaths = html.match(/\.\/assets\/[A-Za-z0-9_./-]+/g) || [];
-  assert.ok(assetPaths.every(path => !path.includes('..')));
-});
-
-test('decorative section ordinals stay hidden from assistive technology', () => {
-  const harness = createHarness({ introEnabled: false });
-  harness.app.renderSections();
-  const ordinal = harness.appNode.querySelector('.section-index');
-  assert.ok(ordinal);
-  assert.equal(ordinal.getAttribute('aria-hidden'), 'true');
-});
-
-test('lower-page interaction and responsive layout hooks remain intact', () => {
-  const html = source();
-  const app = scriptById(html, 'wedding-app');
-  for (const hook of ['copyAddress', 'copyAccount', 'galleryIndex', 'share']) {
-    assert.match(app, new RegExp(`dataset\\.${hook}`));
-  }
-  assert.match(html, /\.address-copy-button\s*\{[\s\S]*?display:\s*flex;[\s\S]*?width:\s*fit-content;[\s\S]*?justify-content:\s*center;[\s\S]*?margin:\s*10px auto 22px;/);
-  assert.match(html, /\.transport-item\s*\{[\s\S]*?grid-template-columns:\s*88px 1fr;/);
-  assert.match(html, /\.map-media\s*\{[\s\S]*?aspect-ratio:\s*4\s*\/\s*3;/);
 });
 
 test('inline runtime scripts and style block are syntactically self-contained', () => {

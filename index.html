@@ -7,20 +7,16 @@
   <script id="wedding-config">
     const WEDDING_CONFIG = Object.freeze({
       sections: { intro: true, hero: true, invitation: true, couple: true, schedule: true, story: true, gallery: true, location: true, transportation: true, notices: true, accounts: true, share: true, outro: true },
-      theme: { paper: '#fafafa', ink: '#252321', muted: '#77736d', sage: '#6d7566', bronze: '#866b56', maxWidth: '425px', transitionMs: 650 },
-      intro: { video: './assets/video/intro.mp4', poster: './assets/images/intro-poster.jpg', eyebrow: 'WEDDING INVITATION', title: 'LOVE OF LIFE', mediaLabel: 'BEGIN OUR DAY', muted: true, fallbackDelayMs: 2800, objectPosition: '50% 50%' },
+      theme: { paper: '#f2efe8', ink: '#20211d', muted: '#77766f', sage: '#798071', bronze: '#9a765a', maxWidth: '460px' },
+      intro: { video: './assets/video/intro.mp4', poster: './assets/images/intro-poster.jpg', eyebrow: 'WEDDING INVITATION', title: 'LOVE OF LIFE', muted: true, fallbackDelayMs: 2800 },
       couple: {
         groom: { name: '김민준', englishName: 'MINJUN', phone: '010-1234-5678', parents: [{ relation: '아버지', name: '김아버지', phone: '010-1111-1111' }, { relation: '어머니', name: '박어머니', phone: '010-2222-2222' }] },
         bride: { name: '이서연', englishName: 'SEOYEON', phone: '010-9876-5432', parents: [{ relation: '아버지', name: '이아버지', phone: '010-3333-3333' }, { relation: '어머니', name: '최어머니', phone: '010-4444-4444' }] },
       },
       wedding: { iso: '2026-10-24T12:30:00+09:00', dateKey: '2026-10-24', displayDate: '2026. 10. 24. SAT', displayTime: '오후 12시 30분', venue: '아르베 웨딩', hall: '그랜드 홀 · 3층', address: '서울특별시 강남구 테헤란로 123', phone: '02-1234-5678' },
-      messages: { hero: 'BEGINS\nON OCT', heroOrbit: 'JOIN US · JOIN US ·', heroTagline: 'A new chapter begins with the people we love.', invitationTitle: '소중한 분들을 초대합니다', invitation: ['서로의 하루를 아끼며', '같은 곳을 바라보게 된 두 사람이', '이제 한 가족이 되려 합니다.', '', '저희의 새로운 시작을', '따뜻한 마음으로 축복해 주세요.'], outro: ['장담하건대, 세상이 다 겨울이어도', '우리 사랑은 늘 봄처럼 따뜻할 것입니다.'], signature: 'With love, Minjun & Seoyeon' },
+      messages: { hero: 'OUR STORY\nBEGINS HERE', invitationTitle: '소중한 분들을 초대합니다', invitation: ['서로의 하루를 아끼며', '같은 곳을 바라보게 된 두 사람이', '이제 한 가족이 되려 합니다.', '', '저희의 새로운 시작을', '따뜻한 마음으로 축복해 주세요.'], outro: ['장담하건대, 세상이 다 겨울이어도', '우리 사랑은 늘 봄처럼 따뜻할 것입니다.'], signature: 'With love, Minjun & Seoyeon' },
       media: { hero: './assets/images/hero.jpg', map: './assets/images/map.jpg', gallery: Array.from({ length: 8 }, (_, index) => ({ src: `./assets/images/gallery-${String(index + 1).padStart(2, '0')}.jpg`, alt: `웨딩 사진 ${index + 1}` })) },
-      story: [
-        { year: '2020', label: '첫 만남', title: '우연처럼 시작된 우리', body: '평범했던 하루가 서로를 만나 특별해졌습니다.', image: './assets/images/story-01.jpg', alt: '처음 만난 시절의 두 사람' },
-        { year: '2022', label: '여행', title: '같은 풍경을 바라보며', body: '수많은 계절과 여행 속에서 서로의 가장 편안한 사람이 되었습니다.', image: './assets/images/story-02.jpg', alt: '함께 여행하는 두 사람' },
-        { year: '2026', label: '약속', title: '평생을 함께하기로', body: '앞으로의 모든 날을 함께 걷기로 약속했습니다.', image: './assets/images/story-03.jpg', alt: '결혼을 약속한 두 사람' },
-      ],
+      story: [{ year: '2020', label: '첫 만남', title: '우연처럼 시작된 우리', body: '평범했던 하루가 서로를 만나 특별해졌습니다.' }, { year: '2022', label: '여행', title: '같은 풍경을 바라보며', body: '수많은 계절과 여행 속에서 서로의 가장 편안한 사람이 되었습니다.' }, { year: '2026', label: '약속', title: '평생을 함께하기로', body: '앞으로의 모든 날을 함께 걷기로 약속했습니다.' }],
       transportation: [{ title: '지하철', lines: ['2호선 역삼역 3번 출구에서 도보 5분'] }, { title: '버스', lines: ['간선 146, 341, 360', '지선 3412, 4312'] }, { title: '주차', lines: ['건물 지하 주차장 2시간 무료', '가급적 대중교통 이용을 부탁드립니다.'] }],
       notices: [{ eyebrow: 'PHOTO BOOTH', title: '포토부스 이용 안내', body: '예식 당일 포토부스가 준비됩니다. 환한 미소와 따뜻한 메시지를 남겨주세요.' }, { eyebrow: 'FLOWER', title: '화환은 정중히 사양합니다', body: '축하해 주시는 마음만 감사히 받겠습니다.' }],
       accounts: [{ side: '신랑측', holder: '김민준', bank: '신한은행', number: '110-123-456789' }, { side: '신랑측', holder: '김아버지', bank: '국민은행', number: '123456-01-123456' }, { side: '신부측', holder: '이서연', bank: '우리은행', number: '1002-123-456789' }, { side: '신부측', holder: '이아버지', bank: '하나은행', number: '123-456789-01234' }],
@@ -28,29 +24,17 @@
       sharing: { title: '김민준 ♥ 이서연 결혼식에 초대합니다', text: '2026년 10월 24일, 두 사람의 새로운 시작을 함께 축복해 주세요.' },
     });
   </script>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&amp;family=Gowun+Dodum&amp;display=swap">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
   <style>
     :root {
-      --canvas: #eeeeee;
-      --page-width: 425px;
-      --paper: #fafafa;
-      --ink: #252321;
-      --muted: #77736d;
-      --sage: #6d7566;
-      --bronze: #866b56;
-      --line: color-mix(in srgb, var(--ink) 13%, transparent);
-      --transition-duration: 650ms;
-      --media-ratio: 3 / 4;
-      --paper-texture:
-        radial-gradient(circle at 18% 24%, rgb(72 65 56 / 3.5%) 0 0.55px, transparent 0.75px),
-        radial-gradient(circle at 76% 68%, rgb(255 255 255 / 72%) 0 0.7px, transparent 0.9px),
-        linear-gradient(112deg, rgb(255 255 255 / 20%), transparent 42%, rgb(97 86 72 / 2.5%));
-      --display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
-      --korean: 'Gowun Dodum', 'Apple SD Gothic Neo', sans-serif;
-      --ui: Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
-      --serif: var(--display);
-      --sans: var(--ui);
+      --page-width: 460px;
+      --paper: #f2efe8;
+      --ink: #20211d;
+      --muted: #77766f;
+      --sage: #798071;
+      --bronze: #9a765a;
+      --line: color-mix(in srgb, var(--ink) 16%, transparent);
+      --serif: Georgia, 'Times New Roman', 'Noto Serif KR', serif;
+      --sans: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
     }
 
     *,
@@ -61,7 +45,7 @@
 
     html {
       color-scheme: light;
-      background: var(--canvas);
+      background: #d8d3c8;
       scroll-behavior: smooth;
     }
 
@@ -70,7 +54,7 @@
       margin: 0;
       overflow-x: hidden;
       color: var(--ink);
-      background: var(--canvas);
+      background: #d8d3c8;
       font-family: var(--sans);
       font-size: 15px;
       line-height: 1.75;
@@ -125,52 +109,38 @@
       outline-offset: 4px;
     }
 
-    .intro-card,
-    .invitation-page {
-      background-color: var(--paper);
-      background-image: var(--paper-texture);
-      background-size: 17px 23px, 21px 29px, 100% 100%;
-    }
-
     .invitation-page {
       position: relative;
       width: 100%;
       max-width: var(--page-width);
-      min-height: 100svh;
       margin: 0 auto;
       overflow: hidden;
+      background-color: var(--paper);
+      background-image:
+        radial-gradient(circle at 12% 18%, rgb(255 255 255 / 44%) 0 0.8px, transparent 1px),
+        radial-gradient(circle at 82% 64%, rgb(32 33 29 / 6%) 0 0.7px, transparent 1px),
+        linear-gradient(115deg, rgb(255 255 255 / 12%), transparent 44%, rgb(154 118 90 / 4%));
+      background-size: 13px 17px, 19px 23px, 100% 100%;
       isolation: isolate;
     }
 
-    .invitation-page:focus-visible {
-      outline-offset: -4px;
+    .invitation-page:focus {
+      outline: none;
     }
 
     .intro {
       position: fixed;
       z-index: 50;
       inset: 0;
-      overflow: hidden;
-      color: var(--ink);
-      background: var(--canvas);
-      opacity: 1;
-      transition: opacity var(--transition-duration) ease;
-    }
-
-    .intro-shell {
-      width: 100%;
-      max-width: var(--page-width);
-      min-height: 100svh;
-      margin: 0 auto;
-    }
-
-    .intro-card {
-      position: relative;
       display: grid;
-      min-height: 100svh;
-      padding: 70px 24px 34px;
-      grid-template-rows: auto 1fr auto;
       overflow: hidden;
+      place-items: center;
+      color: #f5f1e8;
+      background:
+        radial-gradient(circle at 50% 38%, rgb(121 128 113 / 42%), transparent 44%),
+        #171814;
+      opacity: 1;
+      transition: opacity 520ms ease;
     }
 
     .intro.is-exiting {
@@ -178,48 +148,42 @@
       opacity: 0;
     }
 
-    .intro.is-exiting .intro-card {
-      transform: scale(1.012);
-      transition: transform var(--transition-duration) ease;
-    }
-
-    .intro-copy {
-      align-self: start;
-      padding-top: 24px;
-    }
-
     .intro-video {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: var(--intro-object-position, 50% 50%);
-    }
-
-    .intro-media {
-      position: relative;
-      width: min(72vw, 304px);
-      margin: -12px 0 0 auto;
-      aspect-ratio: var(--media-ratio);
-      overflow: hidden;
-      background: #ded8cf;
+      opacity: 0.78;
     }
 
     .intro.has-media-error .intro-video {
       opacity: 0.16;
     }
 
-    .intro-media-label {
+    .intro-shade {
       position: absolute;
-      right: 12px;
-      bottom: 10px;
-      color: #fff;
-      font: 600 0.62rem/1.4 var(--ui);
-      letter-spacing: 0.18em;
+      inset: 0;
+      background: linear-gradient(180deg, rgb(15 16 13 / 32%), rgb(15 16 13 / 18%) 44%, rgb(15 16 13 / 76%));
+    }
+
+    .intro-content {
+      position: relative;
+      display: grid;
+      width: min(calc(100% - 48px), 420px);
+      min-height: 100svh;
+      padding: 64px 0 38px;
+      grid-template-rows: 1fr auto;
+      text-align: center;
+    }
+
+    .intro-heading {
+      display: grid;
+      place-content: center;
     }
 
     .intro-eyebrow {
       margin: 0 0 15px;
-      color: var(--bronze);
       font-size: 0.68rem;
       font-weight: 700;
       letter-spacing: 0.28em;
@@ -227,59 +191,68 @@
 
     .intro-title {
       max-width: 7em;
-      margin: 0;
+      margin: 0 auto;
       font-family: var(--serif);
-      font-size: clamp(3rem, 14vw, 4.8rem);
+      font-size: clamp(3rem, 16vw, 5.4rem);
       font-weight: 400;
       letter-spacing: -0.06em;
       line-height: 0.9;
     }
 
-    .intro-footer {
+    .intro-actions {
       display: grid;
-      grid-template-columns: auto 1fr;
+      grid-template-columns: 1fr auto;
       align-items: center;
       gap: 14px;
-      margin-top: 28px;
     }
 
-    .intro-skip {
+    .intro-progress {
+      position: relative;
+      height: 1px;
+      grid-column: 1 / -1;
+      overflow: hidden;
+      background: rgb(255 255 255 / 30%);
+    }
+
+    .intro-progress::after {
       position: absolute;
-      z-index: 2;
-      top: 24px;
-      right: 20px;
-      min-height: 44px;
-      padding: 4px 12px;
-      border: 0;
-      border-radius: 8px;
-      color: #fff;
-      background: rgba(0, 0, 0, 0.4);
-      font: 500 14px/1.5 var(--ui);
+      inset: 0;
+      background: currentColor;
+      content: '';
+      transform-origin: left;
+      animation: intro-progress 8s linear infinite;
+    }
+
+    @keyframes intro-progress {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+
+    .intro-control {
+      min-width: 88px;
+      padding: 8px 12px;
+      border: 1px solid rgb(255 255 255 / 48%);
+      color: inherit;
+      background: rgb(15 16 13 / 28%);
       cursor: pointer;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
     }
 
     .intro-sound {
-      min-height: 44px;
-      padding: 4px 0;
-      border: 0;
-      color: var(--ink);
-      background: transparent;
-      font: 600 0.65rem/1.5 var(--ui);
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      cursor: pointer;
+      justify-self: start;
     }
 
     .intro-status {
-      margin: 0;
-      color: var(--muted);
+      margin: 12px 0 0;
+      grid-column: 1 / -1;
       font-size: 0.72rem;
-      text-align: right;
     }
 
     .invitation-section {
       position: relative;
-      padding: clamp(96px, 28vw, 132px) clamp(24px, 7vw, 34px);
+      padding: clamp(72px, 20vw, 112px) clamp(24px, 8vw, 44px);
     }
 
     .has-reveal-motion .reveal {
@@ -305,31 +278,11 @@
     }
 
     .section-header {
-      position: relative;
-      margin-bottom: 48px;
+      margin-bottom: 42px;
       text-align: center;
     }
 
-    .section-index {
-      display: inline-grid;
-      width: 28px;
-      height: 28px;
-      margin-bottom: 20px;
-      border: 1px solid var(--line);
-      border-radius: 50%;
-      place-items: center;
-      color: var(--muted);
-      font: 500 9px/1 var(--ui);
-      letter-spacing: 0.08em;
-    }
-
-    .section-eyebrow {
-      margin: 0 0 14px;
-      font: 500 10px/1.4 var(--ui);
-      letter-spacing: 0.24em;
-      text-transform: uppercase;
-    }
-
+    .section-eyebrow,
     .card-eyebrow,
     .story-year {
       margin: 0 0 12px;
@@ -360,8 +313,11 @@
     }
 
     .hero-section {
+      display: flex;
       min-height: 100svh;
-      padding: 54px 22px 46px;
+      padding: 72px 20px;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
     .hero-section::before {
@@ -369,55 +325,29 @@
     }
 
     .hero-section .section-header {
-      margin: 0;
+      position: relative;
+      z-index: 2;
+      margin: 0 0 -48px;
+      padding: 30px 14px 0;
       text-align: left;
+    }
+
+    .hero-section .section-title {
+      max-width: 7em;
+      margin: 0;
+      font-size: clamp(3.1rem, 16vw, 5.1rem);
+      letter-spacing: -0.065em;
+      line-height: 0.88;
     }
 
     .hero-section .section-eyebrow {
       color: var(--sage);
     }
 
-    .hero-display {
-      position: relative;
-      z-index: 2;
-      display: grid;
-      margin: 30px 0 -34px;
-      font-family: var(--display);
-      font-size: clamp(4.5rem, 22vw, 6.4rem);
-      font-weight: 400;
-      letter-spacing: -0.07em;
-      line-height: 0.72;
-    }
-
-    .hero-display span:last-child {
-      margin-left: 0.46em;
-    }
-
     .hero-media {
-      width: 75%;
+      width: calc(100% - 34px);
       margin-left: auto;
-      aspect-ratio: var(--media-ratio);
-    }
-
-    .hero-orbit {
-      display: grid;
-      width: 78px;
-      height: 78px;
-      margin: -44px 0 0 10px;
-      border: 1px solid var(--ink);
-      border-radius: 50%;
-      place-items: center;
-      font: 500 8px/1.2 var(--ui);
-      letter-spacing: 0.12em;
-      text-align: center;
-    }
-
-    .hero-tagline {
-      max-width: 20em;
-      margin: 24px 0 0 auto;
-      color: var(--muted);
-      font: 400 0.75rem/1.6 var(--ui);
-      text-align: right;
+      aspect-ratio: 3 / 4.15;
     }
 
     .hero-footer {
@@ -649,30 +579,37 @@
     }
 
     .story-list {
+      position: relative;
       display: grid;
-      gap: 86px;
+      gap: 40px;
+    }
+
+    .story-list::before {
+      position: absolute;
+      top: 8px;
+      bottom: 8px;
+      left: 13px;
+      width: 1px;
+      background: var(--line);
+      content: '';
     }
 
     .story-item {
-      display: grid;
-      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-      align-items: end;
-      gap: 22px;
+      position: relative;
+      padding-left: 48px;
     }
 
-    .story-item:nth-child(even) .story-media {
-      grid-column: 2;
-      grid-row: 1;
-    }
-
-    .story-item:nth-child(even) .story-copy {
-      grid-column: 1;
-      grid-row: 1;
-      text-align: right;
-    }
-
-    .story-media {
-      aspect-ratio: var(--media-ratio);
+    .story-item::before {
+      position: absolute;
+      top: 6px;
+      left: 9px;
+      width: 9px;
+      height: 9px;
+      border: 2px solid var(--paper);
+      border-radius: 50%;
+      background: var(--bronze);
+      box-shadow: 0 0 0 1px var(--bronze);
+      content: '';
     }
 
     .story-title,
@@ -700,7 +637,7 @@
     .gallery-grid {
       display: grid;
       grid-template-columns: repeat(12, minmax(0, 1fr));
-      gap: 7px;
+      gap: 8px;
     }
 
     .gallery-button {
@@ -731,16 +668,6 @@
       aspect-ratio: 3 / 4.45;
     }
 
-    .location-section .section-body {
-      margin-inline: calc(clamp(24px, 7vw, 34px) * -1);
-    }
-
-    .location-address,
-    .location-section .address-copy-button,
-    .location-section .venue-phone {
-      margin-inline: auto;
-    }
-
     .location-address {
       margin: 0;
       text-align: center;
@@ -762,7 +689,6 @@
     }
 
     .map-media {
-      margin-top: 34px;
       aspect-ratio: 4 / 3;
     }
 
@@ -784,12 +710,10 @@
       gap: 12px;
     }
 
-    .transport-item {
-      display: grid;
-      padding: 22px 0;
+    .transport-item,
+    .notice-card {
+      padding: 26px 24px;
       border-top: 1px solid var(--line);
-      grid-template-columns: 88px 1fr;
-      gap: 18px;
     }
 
     .transport-lines {
@@ -797,10 +721,8 @@
     }
 
     .notice-card {
-      padding: 28px 0;
-      border: 0;
-      border-top: 1px solid var(--line);
-      background: transparent;
+      border: 1px solid var(--line);
+      background: rgb(255 255 255 / 15%);
     }
 
     .account-groups {
@@ -810,6 +732,7 @@
 
     .account-group {
       border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
     }
 
     .account-group summary {
@@ -866,8 +789,7 @@
       padding: 4px 10px;
     }
 
-    .share-section,
-    .outro-section {
+    .share-panel {
       text-align: center;
     }
 
@@ -881,17 +803,17 @@
 
     .outro-section {
       display: flex;
-      min-height: 90svh;
+      min-height: 72svh;
       flex-direction: column;
       justify-content: center;
+      text-align: center;
     }
 
     .outro-lines {
       display: grid;
       gap: 4px;
-      font-family: var(--display);
-      font-size: clamp(2.6rem, 12vw, 4rem);
-      line-height: 0.98;
+      font-family: var(--serif);
+      font-size: 1.13rem;
     }
 
     .outro-lines p {
@@ -993,9 +915,6 @@
     }
 
     .address-copy-button {
-      display: flex;
-      width: fit-content;
-      justify-content: center;
       margin: 10px auto 22px;
       padding: 8px 16px;
       border: 1px solid var(--line);
@@ -1072,27 +991,28 @@
         background: Canvas;
         forced-color-adjust: auto;
       }
+
+      .story-item::before {
+        background: CanvasText;
+      }
     }
   </style>
 </head>
 <body>
   <template id="intro-template">
     <div id="intro" class="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title">
-      <div class="intro-shell">
-        <div class="intro-card">
-          <button id="intro-skip" class="intro-skip" type="button" aria-label="인트로 건너뛰기">SKIP</button>
-          <div class="intro-copy">
-            <p class="intro-eyebrow" data-intro-eyebrow></p>
-            <h1 id="intro-title" class="intro-title" data-intro-title></h1>
-          </div>
-          <div class="intro-media">
-            <video id="intro-video" class="intro-video" autoplay muted playsinline preload="auto"></video>
-            <span class="intro-media-label" data-intro-media-label aria-hidden="true"></span>
-          </div>
-          <div class="intro-footer">
-            <button id="intro-sound" class="intro-sound" type="button"></button>
-            <p class="intro-status" data-intro-status aria-live="polite"></p>
-          </div>
+      <video id="intro-video" class="intro-video" autoplay muted playsinline preload="auto"></video>
+      <div class="intro-shade" aria-hidden="true"></div>
+      <div class="intro-content">
+        <div class="intro-heading">
+          <p class="intro-eyebrow" data-intro-eyebrow></p>
+          <h1 id="intro-title" class="intro-title" data-intro-title></h1>
+        </div>
+        <div class="intro-actions">
+          <div class="intro-progress" aria-hidden="true"></div>
+          <button id="intro-sound" class="intro-control intro-sound" type="button"></button>
+          <button id="intro-skip" class="intro-control" type="button" aria-label="인트로 건너뛰기">SKIP</button>
+          <p class="intro-status" data-intro-status aria-live="polite"></p>
         </div>
       </div>
     </div>
@@ -1174,9 +1094,9 @@
         couple: renderCouple,
         schedule: renderSchedule,
         story: renderStory,
+        gallery: renderGallery,
         location: renderLocation,
         transportation: renderTransportation,
-        gallery: renderGallery,
         notices: renderNotices,
         accounts: renderAccounts,
         share: renderShare,
@@ -1201,15 +1121,7 @@
         const frame = element('figure', 'media-frame');
         frame.dataset.media = String(src || '');
         const placeholder = element('span', 'media-placeholder', label || '사진을 준비하고 있습니다');
-        placeholder.setAttribute('aria-hidden', 'true');
         frame.append(placeholder);
-
-        const exposeFallbackDescription = () => {
-          const description = String(alt || '').trim();
-          if (!description) return;
-          frame.setAttribute('role', 'img');
-          frame.setAttribute('aria-label', description);
-        };
 
         if (String(src || '').trim()) {
           const image = element('img');
@@ -1222,13 +1134,11 @@
           image.addEventListener('error', () => {
             image.remove();
             frame.classList.add('has-media-error');
-            exposeFallbackDescription();
           }, { once: true });
           image.src = src;
           frame.append(image);
         } else {
           frame.classList.add('has-media-error');
-          exposeFallbackDescription();
         }
 
         return frame;
@@ -1237,15 +1147,7 @@
       function sectionShell(key, eyebrow, title, headingTag = 'h2') {
         const section = element('section', `invitation-section ${key}-section reveal`);
         section.dataset.section = key;
-        section.tabIndex = -1;
         const header = element('header', 'section-header');
-        const enabledKeys = Object.keys(SECTION_RENDERERS).filter(name => WEDDING_CONFIG.sections[name] === true);
-        const ordinal = enabledKeys.indexOf(key) + 1;
-        if (ordinal > 0) {
-          const index = element('span', 'section-index', String(ordinal).padStart(2, '0'));
-          index.setAttribute('aria-hidden', 'true');
-          header.append(index);
-        }
         if (eyebrow) header.append(element('p', 'section-eyebrow', eyebrow));
         if (title) header.append(element(headingTag, 'section-title', title));
         const body = element('div', 'section-body');
@@ -1258,21 +1160,16 @@
       }
 
       function renderHero() {
-        const section = sectionShell('hero', 'Wedding Invitation', '', 'h1');
+        const section = sectionShell('hero', 'Wedding Invitation', WEDDING_CONFIG.messages.hero, 'h1');
         const body = sectionBody(section);
-        const display = element('h1', 'hero-display');
-        WeddingUtils.toLines(WEDDING_CONFIG.messages.hero).forEach(line => display.append(element('span', '', line)));
         const media = mediaFrame(WEDDING_CONFIG.media.hero, `${WEDDING_CONFIG.couple.groom.name}과 ${WEDDING_CONFIG.couple.bride.name}의 대표 사진`, 'Main Portrait');
         media.classList.add('hero-media');
-        const orbit = element('span', 'hero-orbit', WEDDING_CONFIG.messages.heroOrbit || '');
-        orbit.setAttribute('aria-hidden', 'true');
-        const tagline = element('p', 'hero-tagline', WEDDING_CONFIG.messages.heroTagline || '');
         const footer = element('div', 'hero-footer');
         footer.append(
           element('p', 'hero-names', `${WEDDING_CONFIG.couple.groom.name} · ${WEDDING_CONFIG.couple.bride.name}`),
           element('p', 'hero-date', WEDDING_CONFIG.wedding.displayDate),
         );
-        body.append(display, media, orbit, tagline, footer);
+        body.append(media, footer);
         return section;
       }
 
@@ -1414,19 +1311,14 @@
       function renderStory() {
         const section = sectionShell('story', 'Our Story', '우리의 시간');
         const list = element('div', 'story-list');
-        WEDDING_CONFIG.story.forEach((item, index) => {
+        WEDDING_CONFIG.story.forEach(item => {
           const article = element('article', 'story-item');
-          const imageSource = item.image || WEDDING_CONFIG.media.gallery[index]?.src || '';
-          const media = mediaFrame(imageSource, item.alt || item.title, `Story ${String(index + 1).padStart(2, '0')}`);
-          media.classList.add('story-media');
-          const copy = element('div', 'story-copy');
-          copy.append(
+          article.append(
             element('p', 'story-year', item.year),
             element('p', 'story-label', item.label),
             element('h3', 'story-title', item.title),
             element('p', 'story-body', item.body),
           );
-          article.append(media, copy);
           list.append(article);
         });
         sectionBody(section).append(list);
@@ -1580,8 +1472,6 @@
         root.style.setProperty('--muted', WEDDING_CONFIG.theme.muted);
         root.style.setProperty('--sage', WEDDING_CONFIG.theme.sage);
         root.style.setProperty('--bronze', WEDDING_CONFIG.theme.bronze);
-        const transitionMs = Number(WEDDING_CONFIG.theme.transitionMs);
-        root.style.setProperty('--transition-duration', `${Number.isFinite(transitionMs) ? Math.max(0, transitionMs) : 650}ms`);
       }
 
       function renderSections() {
@@ -1742,10 +1632,11 @@
               url: location.href,
             });
             announce('초대장을 공유했습니다.');
-            return;
           } catch (error) {
             if (error && error.name === 'AbortError') return;
+            announce('초대장을 공유하지 못했습니다.');
           }
+          return;
         }
 
         const copied = await copyText(location.href);
@@ -1839,14 +1730,8 @@
         app.removeAttribute('aria-hidden');
       }
 
-      function introExitTarget(app) {
-        if (!app) return null;
-        return app.querySelector('[data-section]') || app;
-      }
-
       function finishIntro(reason = 'complete') {
         const app = document.getElementById('invitation-app');
-        const exitTarget = introExitTarget(app);
         document.removeEventListener('keydown', handleIntroKeydown);
         restoreInvitationAccess(app);
         if (introFinished) return;
@@ -1865,16 +1750,14 @@
           }
         }
         if (!intro) {
-          if (exitTarget) exitTarget.focus({ preventScroll: true });
+          if (app) app.focus({ preventScroll: true });
           return;
         }
 
         intro.dataset.exitReason = reason;
-        intro.inert = true;
-        intro.setAttribute('inert', '');
         intro.setAttribute('aria-hidden', 'true');
         intro.classList.add('is-exiting');
-        if (exitTarget) exitTarget.focus({ preventScroll: true });
+        if (app) app.focus({ preventScroll: true });
 
         const removeIntro = () => {
           window.clearTimeout(introRemovalTimer);
@@ -1887,12 +1770,10 @@
         intro.addEventListener('transitionend', onTransitionEnd);
 
         const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const configuredDuration = Number(WEDDING_CONFIG.theme.transitionMs);
-        const duration = Number.isFinite(configuredDuration) ? Math.max(0, configuredDuration) : 650;
-        if (reducedMotion || duration === 0) {
+        if (reducedMotion) {
           removeIntro();
         } else {
-          introRemovalTimer = window.setTimeout(removeIntro, duration + 80);
+          introRemovalTimer = window.setTimeout(removeIntro, 700);
         }
       }
 
@@ -1925,8 +1806,6 @@
         }
         intro.querySelector('[data-intro-eyebrow]').textContent = WEDDING_CONFIG.intro.eyebrow;
         intro.querySelector('[data-intro-title]').textContent = WEDDING_CONFIG.intro.title;
-        intro.style.setProperty('--intro-object-position', WEDDING_CONFIG.intro.objectPosition || '50% 50%');
-        intro.querySelector('[data-intro-media-label]').textContent = WEDDING_CONFIG.intro.mediaLabel || '';
 
         video.autoplay = true;
         video.muted = Boolean(WEDDING_CONFIG.intro.muted);
