@@ -8,7 +8,7 @@
 
 모든 수정 지점은 `index.html` 상단의 `WEDDING_CONFIG.intro`에 둔다.
 
-- `names`: 첫째 줄 `규민 ❤️ 사라`
+- `names`: 첫째 줄 `규민 ♡ 사라` (색이 채워지지 않은 선형 하트 문자)
 - `message`: 둘째 줄 `결혼 여정을 시작합니다.`
 - `messageHoldMs`: 페이드 시작 전 문구 유지 시간, 기본값 `1000`
 - `messageFadeMs`: 문구 페이드 시간, 기본값 `600`
