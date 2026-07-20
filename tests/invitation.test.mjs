@@ -158,7 +158,7 @@ class FakeFragment extends FakeNode {
   }
 }
 
-function createHarness({ now = Date.now(), introEnabled = true, names } = {}) {
+function createHarness({ now = Date.now(), introEnabled = true, names, disabledSections = [] } = {}) {
   const ids = new Map();
   const documentListeners = new Map();
   const clearedIntervals = [];
@@ -199,7 +199,9 @@ function createHarness({ now = Date.now(), introEnabled = true, names } = {}) {
   heading.dataset.introTitle = '';
   const status = new FakeNode('p');
   status.dataset.introStatus = '';
-  intro.append(eyebrow, heading, status);
+  const mediaLabel = new FakeNode('span');
+  mediaLabel.dataset.introMediaLabel = '';
+  intro.append(eyebrow, heading, status, mediaLabel);
   ids.set('intro', intro);
 
   const video = new FakeNode('video');
@@ -232,6 +234,9 @@ function createHarness({ now = Date.now(), introEnabled = true, names } = {}) {
 
   let configScript = scriptById(source(), 'wedding-config');
   if (!introEnabled) configScript = configScript.replace('intro: true', 'intro: false');
+  for (const key of disabledSections) {
+    configScript = configScript.replace(`${key}: true`, `${key}: false`);
+  }
   if (names) {
     configScript = configScript
       .replace("groom: { name: '김민준'", `groom: { name: '${names.groom}'`)
@@ -407,6 +412,28 @@ test('intro hides and inerts the invitation, labels and focuses skip, then resto
   assert.equal(harness.appNode.getAttribute('aria-hidden'), null);
   assert.equal(harness.appNode.focusCalls.length, 1);
   assert.equal(harness.appNode.focusCalls[0].preventScroll, true);
+});
+
+test('intro and invitation share the paper canvas without a dark full-screen flash', () => {
+  const html = source();
+  assert.match(html, /class="intro-shell"/);
+  assert.match(html, /class="intro-card"/);
+  assert.match(html, /class="intro-media"/);
+  assert.match(html, /\.intro-card,\s*\n\s*\.invitation-page\s*\{[\s\S]*background-image:\s*var\(--paper-texture\)/);
+  assert.match(html, /\.intro\s*\{[\s\S]*background:\s*var\(--canvas\)/);
+  assert.match(html, /\.intro-skip\s*\{[\s\S]*top:\s*24px;[\s\S]*right:\s*20px;[\s\S]*rgba\(0, 0, 0, 0\.4\)/);
+});
+
+test('intro exits to the first enabled section when hero is disabled', () => {
+  const harness = createHarness({ disabledSections: ['hero'] });
+  harness.app.renderSections();
+  harness.app.renderIntro();
+  harness.app.finishIntro('skip');
+  const firstSection = harness.appNode.querySelector('[data-section]');
+  assert.equal(firstSection.dataset.section, 'invitation');
+  assert.equal(firstSection.focusCalls.length, 1);
+  assert.equal(harness.appNode.inert, false);
+  assert.equal(harness.appNode.getAttribute('aria-hidden'), null);
 });
 
 test('intro removes its Escape listener on finish and stays inactive when disabled', () => {
