@@ -234,8 +234,8 @@ function createHarness({ now = Date.now(), introEnabled = true, names } = {}) {
   if (!introEnabled) configScript = configScript.replace('intro: true', 'intro: false');
   if (names) {
     configScript = configScript
-      .replace("groom: { name: '김민준'", `groom: { name: '${names.groom}'`)
-      .replace("bride: { name: '이서연'", `bride: { name: '${names.bride}'`);
+      .replace(/groom:\s*\{\s*name:\s*'[^']*'/, `groom: { name: '${names.groom}'`)
+      .replace(/bride:\s*\{\s*name:\s*'[^']*'/, `bride: { name: '${names.bride}'`);
   }
 
   const appScript = scriptById(source(), 'wedding-app')
