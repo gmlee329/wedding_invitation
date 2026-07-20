@@ -83,7 +83,7 @@ test('reference-aligned canvas tokens and editable motion defaults are configure
 Run:
 
 ```bash
-node --test tests/invitation.test.mjs
+/Users/gyumin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test tests/invitation.test.mjs
 ```
 
 Expected: 새 두 테스트가 `460px`, 누락된 `transitionMs`/`objectPosition`, 빈 스타일시트 목록 때문에 FAIL하고 기존 테스트는 계속 PASS한다.
@@ -101,7 +101,7 @@ Expected: 새 두 테스트가 `460px`, 누락된 `transitionMs`/`objectPosition
 
 ```js
 theme: { paper: '#fafafa', ink: '#252321', muted: '#77736d', sage: '#777f70', bronze: '#9d8069', maxWidth: '425px', transitionMs: 650 },
-intro: { video: './assets/video/intro.mp4', poster: './assets/images/intro-poster.jpg', eyebrow: 'WEDDING INVITATION', title: 'LOVE OF LIFE', muted: true, fallbackDelayMs: 2800, objectPosition: '50% 50%' },
+intro: { video: './assets/video/intro.mp4', poster: './assets/images/intro-poster.jpg', eyebrow: 'WEDDING INVITATION', title: 'LOVE OF LIFE', mediaLabel: 'BEGIN OUR DAY', muted: true, fallbackDelayMs: 2800, objectPosition: '50% 50%' },
 ```
 
 루트 토큰을 다음처럼 교체한다.
@@ -137,7 +137,7 @@ root.style.setProperty('--transition-duration', `${Number.isFinite(transitionMs)
 
 - [ ] **Step 4: 전체 테스트가 통과하는지 확인한다**
 
-Run: `node --test tests/invitation.test.mjs`
+Run: `/Users/gyumin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test tests/invitation.test.mjs`
 
 Expected: 기존 16개와 새 2개 테스트가 모두 PASS한다.
 
@@ -203,7 +203,7 @@ test('intro exits to the first enabled section when hero is disabled', () => {
 
 - [ ] **Step 2: 기존 전체 화면 영상과 앱 루트 고정 포커스 때문에 테스트가 실패하는지 확인한다**
 
-Run: `node --test tests/invitation.test.mjs`
+Run: `/Users/gyumin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test tests/invitation.test.mjs`
 
 Expected: `.intro-card`, `.intro-media`, 공용 종이 배경이 없고 종료 포커스가 앱 루트에 가므로 새 테스트가 FAIL한다.
 
@@ -222,7 +222,7 @@ Expected: `.intro-card`, `.intro-media`, 공용 종이 배경이 없고 종료 �
       </div>
       <div class="intro-media">
         <video id="intro-video" class="intro-video" autoplay muted playsinline preload="auto"></video>
-        <span class="intro-media-label" aria-hidden="true">BEGIN OUR DAY</span>
+        <span class="intro-media-label" data-intro-media-label aria-hidden="true"></span>
       </div>
       <div class="intro-footer">
         <button id="intro-sound" class="intro-sound" type="button"></button>
@@ -320,6 +320,7 @@ Expected: `.intro-card`, `.intro-media`, 공용 종이 배경이 없고 종료 �
 
 ```js
 intro.style.setProperty('--intro-object-position', WEDDING_CONFIG.intro.objectPosition || '50% 50%');
+intro.querySelector('[data-intro-media-label]').textContent = WEDDING_CONFIG.intro.mediaLabel || '';
 ```
 
 `finishIntro()` 앞에 다음 함수를 추가하고, 기존 `app.focus()` 두 곳을 `exitTarget.focus()`로 교체한다. 각 섹션은 `sectionShell()`에서 `section.tabIndex = -1`로 만든다.
@@ -372,7 +373,7 @@ function finishIntro(reason = 'complete') {
 
 - [ ] **Step 6: 인트로 계약과 기존 테스트가 모두 통과하는지 확인한다**
 
-Run: `node --test tests/invitation.test.mjs`
+Run: `/Users/gyumin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test tests/invitation.test.mjs`
 
 Expected: 공용 캔버스, 스킵, `hero=false`, Escape·포커스·리스너 정리를 포함한 모든 테스트가 PASS한다.
 
@@ -403,6 +404,10 @@ git commit -m "feat: blend video intro into invitation canvas"
 test('hero through story render the reference-aligned editorial structure', () => {
   const html = source();
   const app = scriptById(html, 'wedding-app');
+  const { WEDDING_CONFIG: config } = loadContracts();
+  assert.equal(config.messages.hero, 'BEGINS\nON OCT');
+  assert.equal(config.messages.heroOrbit, 'JOIN US · JOIN US ·');
+  assert.equal(config.messages.heroTagline, 'A new chapter begins with the people we love.');
   assert.match(app, /hero-display/);
   assert.match(app, /hero-orbit/);
   assert.match(app, /hero-tagline/);
@@ -421,13 +426,21 @@ test('optional story images stay inside the replaceable image folder', () => {
 
 - [ ] **Step 2: 새 구조 클래스와 스토리 이미지가 없어 테스트가 실패하는지 확인한다**
 
-Run: `node --test tests/invitation.test.mjs`
+Run: `/Users/gyumin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test tests/invitation.test.mjs`
 
 Expected: 에디토리얼 클래스와 `story.image` 계약이 구현되지 않아 첫 테스트가 FAIL한다.
 
-- [ ] **Step 3: 스토리 이미지 설정을 호환 가능한 선택 필드로 추가한다**
+- [ ] **Step 3: 히어로 문구와 스토리 이미지 설정을 호환 가능한 선택 필드로 추가한다**
 
-기존 `story` 배열의 각 항목에 다음 경로와 대체 텍스트를 추가한다. 키 이름과 배열 구조는 유지한다.
+기존 `messages` 객체에서 히어로 관련 값만 다음처럼 변경·추가한다. 새 장식 문구도 HTML이나 렌더러에 하드코딩하지 않는다.
+
+```js
+hero: 'BEGINS\nON OCT',
+heroOrbit: 'JOIN US · JOIN US ·',
+heroTagline: 'A new chapter begins with the people we love.',
+```
+
+기존 `story` 배열의 각 항목에는 다음 경로와 대체 텍스트를 추가한다. 키 이름과 배열 구조는 유지한다.
 
 ```js
 story: [
@@ -470,9 +483,9 @@ function renderHero() {
   WeddingUtils.toLines(WEDDING_CONFIG.messages.hero).forEach(line => display.append(element('span', '', line)));
   const media = mediaFrame(WEDDING_CONFIG.media.hero, `${WEDDING_CONFIG.couple.groom.name}과 ${WEDDING_CONFIG.couple.bride.name}의 대표 사진`, 'Main Portrait');
   media.classList.add('hero-media');
-  const orbit = element('span', 'hero-orbit', 'JOIN US · JOIN US ·');
+  const orbit = element('span', 'hero-orbit', WEDDING_CONFIG.messages.heroOrbit || '');
   orbit.setAttribute('aria-hidden', 'true');
-  const tagline = element('p', 'hero-tagline', 'A new chapter begins with the people we love.');
+  const tagline = element('p', 'hero-tagline', WEDDING_CONFIG.messages.heroTagline || '');
   const footer = element('div', 'hero-footer');
   footer.append(
     element('p', 'hero-names', `${WEDDING_CONFIG.couple.groom.name} · ${WEDDING_CONFIG.couple.bride.name}`),
@@ -615,7 +628,7 @@ function renderStory() {
 
 - [ ] **Step 7: 핵심 섹션 테스트와 전체 회귀 테스트를 실행한다**
 
-Run: `node --test tests/invitation.test.mjs`
+Run: `/Users/gyumin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test tests/invitation.test.mjs`
 
 Expected: 히어로·스토리 구조, 달력·카운트다운, 연락처, 설정 호환 테스트가 모두 PASS한다.
 
@@ -661,7 +674,7 @@ test('sections follow the reference narrative order and keep lower-page interact
 
 - [ ] **Step 2: 현재 갤러리 우선 순서 때문에 테스트가 실패하는지 확인한다**
 
-Run: `node --test tests/invitation.test.mjs`
+Run: `/Users/gyumin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test tests/invitation.test.mjs`
 
 Expected: 현재 `gallery`가 `location`보다 앞에 있어 순서 테스트가 FAIL한다.
 
@@ -758,7 +771,7 @@ const SECTION_RENDERERS = {
 
 - [ ] **Step 5: 전체 테스트가 통과하는지 확인한다**
 
-Run: `node --test tests/invitation.test.mjs`
+Run: `/Users/gyumin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test tests/invitation.test.mjs`
 
 Expected: 새 순서·스타일 계약과 기존 지도·복사·공유·갤러리 동작 테스트가 모두 PASS한다.
 
@@ -806,14 +819,14 @@ test('font CDN failure cannot remove local content or require external JavaScrip
 
 - [ ] **Step 2: 테스트를 실행하고 필요한 누락 보호 규칙이 있으면 정확한 실패를 확인한다**
 
-Run: `node --test tests/invitation.test.mjs`
+Run: `/Users/gyumin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test tests/invitation.test.mjs`
 
-Expected: 구현된 CSS와 상대 경로가 모두 존재하면 PASS한다. 실패 시 보고된 누락 selector 또는 절대 경로만 수정한다.
+Expected: 구현된 CSS 보호 규칙과 상대 경로가 모두 존재하므로 새 테스트까지 PASS한다.
 
 - [ ] **Step 3: 전체 정적 검증을 실행한다**
 
 ```bash
-node --test tests/invitation.test.mjs
+/Users/gyumin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node --test tests/invitation.test.mjs
 git diff --check
 rg -n "TO[D]O|TB[D]|FIXM[E]|PLACEHOLDE[R]" index.html tests/invitation.test.mjs
 ```
