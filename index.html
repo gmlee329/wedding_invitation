@@ -14,9 +14,13 @@
         bride: { name: '이서연', englishName: 'SEOYEON', phone: '010-9876-5432', parents: [{ relation: '아버지', name: '이아버지', phone: '010-3333-3333' }, { relation: '어머니', name: '최어머니', phone: '010-4444-4444' }] },
       },
       wedding: { iso: '2026-10-24T12:30:00+09:00', dateKey: '2026-10-24', displayDate: '2026. 10. 24. SAT', displayTime: '오후 12시 30분', venue: '아르베 웨딩', hall: '그랜드 홀 · 3층', address: '서울특별시 강남구 테헤란로 123', phone: '02-1234-5678' },
-      messages: { hero: 'OUR STORY\nBEGINS HERE', invitationTitle: '소중한 분들을 초대합니다', invitation: ['서로의 하루를 아끼며', '같은 곳을 바라보게 된 두 사람이', '이제 한 가족이 되려 합니다.', '', '저희의 새로운 시작을', '따뜻한 마음으로 축복해 주세요.'], outro: ['장담하건대, 세상이 다 겨울이어도', '우리 사랑은 늘 봄처럼 따뜻할 것입니다.'], signature: 'With love, Minjun & Seoyeon' },
+      messages: { hero: 'BEGINS\nON OCT', heroOrbit: 'JOIN US · JOIN US ·', heroTagline: 'A new chapter begins with the people we love.', invitationTitle: '소중한 분들을 초대합니다', invitation: ['서로의 하루를 아끼며', '같은 곳을 바라보게 된 두 사람이', '이제 한 가족이 되려 합니다.', '', '저희의 새로운 시작을', '따뜻한 마음으로 축복해 주세요.'], outro: ['장담하건대, 세상이 다 겨울이어도', '우리 사랑은 늘 봄처럼 따뜻할 것입니다.'], signature: 'With love, Minjun & Seoyeon' },
       media: { hero: './assets/images/hero.jpg', map: './assets/images/map.jpg', gallery: Array.from({ length: 8 }, (_, index) => ({ src: `./assets/images/gallery-${String(index + 1).padStart(2, '0')}.jpg`, alt: `웨딩 사진 ${index + 1}` })) },
-      story: [{ year: '2020', label: '첫 만남', title: '우연처럼 시작된 우리', body: '평범했던 하루가 서로를 만나 특별해졌습니다.' }, { year: '2022', label: '여행', title: '같은 풍경을 바라보며', body: '수많은 계절과 여행 속에서 서로의 가장 편안한 사람이 되었습니다.' }, { year: '2026', label: '약속', title: '평생을 함께하기로', body: '앞으로의 모든 날을 함께 걷기로 약속했습니다.' }],
+      story: [
+        { year: '2020', label: '첫 만남', title: '우연처럼 시작된 우리', body: '평범했던 하루가 서로를 만나 특별해졌습니다.', image: './assets/images/story-01.jpg', alt: '처음 만난 시절의 두 사람' },
+        { year: '2022', label: '여행', title: '같은 풍경을 바라보며', body: '수많은 계절과 여행 속에서 서로의 가장 편안한 사람이 되었습니다.', image: './assets/images/story-02.jpg', alt: '함께 여행하는 두 사람' },
+        { year: '2026', label: '약속', title: '평생을 함께하기로', body: '앞으로의 모든 날을 함께 걷기로 약속했습니다.', image: './assets/images/story-03.jpg', alt: '결혼을 약속한 두 사람' },
+      ],
       transportation: [{ title: '지하철', lines: ['2호선 역삼역 3번 출구에서 도보 5분'] }, { title: '버스', lines: ['간선 146, 341, 360', '지선 3412, 4312'] }, { title: '주차', lines: ['건물 지하 주차장 2시간 무료', '가급적 대중교통 이용을 부탁드립니다.'] }],
       notices: [{ eyebrow: 'PHOTO BOOTH', title: '포토부스 이용 안내', body: '예식 당일 포토부스가 준비됩니다. 환한 미소와 따뜻한 메시지를 남겨주세요.' }, { eyebrow: 'FLOWER', title: '화환은 정중히 사양합니다', body: '축하해 주시는 마음만 감사히 받겠습니다.' }],
       accounts: [{ side: '신랑측', holder: '김민준', bank: '신한은행', number: '110-123-456789' }, { side: '신랑측', holder: '김아버지', bank: '국민은행', number: '123456-01-123456' }, { side: '신부측', holder: '이서연', bank: '우리은행', number: '1002-123-456789' }, { side: '신부측', holder: '이아버지', bank: '하나은행', number: '123-456789-01234' }],
@@ -274,7 +278,7 @@
 
     .invitation-section {
       position: relative;
-      padding: clamp(72px, 20vw, 112px) clamp(24px, 8vw, 44px);
+      padding: clamp(96px, 28vw, 132px) clamp(24px, 7vw, 34px);
     }
 
     .has-reveal-motion .reveal {
@@ -300,11 +304,31 @@
     }
 
     .section-header {
-      margin-bottom: 42px;
+      position: relative;
+      margin-bottom: 48px;
       text-align: center;
     }
 
-    .section-eyebrow,
+    .section-index {
+      display: inline-grid;
+      width: 28px;
+      height: 28px;
+      margin-bottom: 20px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      place-items: center;
+      color: var(--muted);
+      font: 500 9px/1 var(--ui);
+      letter-spacing: 0.08em;
+    }
+
+    .section-eyebrow {
+      margin: 0 0 14px;
+      font: 500 10px/1.4 var(--ui);
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+    }
+
     .card-eyebrow,
     .story-year {
       margin: 0 0 12px;
@@ -335,11 +359,8 @@
     }
 
     .hero-section {
-      display: flex;
       min-height: 100svh;
-      padding: 72px 20px;
-      flex-direction: column;
-      justify-content: space-between;
+      padding: 54px 22px 46px;
     }
 
     .hero-section::before {
@@ -347,29 +368,55 @@
     }
 
     .hero-section .section-header {
-      position: relative;
-      z-index: 2;
-      margin: 0 0 -48px;
-      padding: 30px 14px 0;
-      text-align: left;
-    }
-
-    .hero-section .section-title {
-      max-width: 7em;
       margin: 0;
-      font-size: clamp(3.1rem, 16vw, 5.1rem);
-      letter-spacing: -0.065em;
-      line-height: 0.88;
+      text-align: left;
     }
 
     .hero-section .section-eyebrow {
       color: var(--sage);
     }
 
+    .hero-display {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      margin: 30px 0 -34px;
+      font-family: var(--display);
+      font-size: clamp(4.5rem, 22vw, 6.4rem);
+      font-weight: 400;
+      letter-spacing: -0.07em;
+      line-height: 0.72;
+    }
+
+    .hero-display span:last-child {
+      margin-left: 0.46em;
+    }
+
     .hero-media {
-      width: calc(100% - 34px);
+      width: 75%;
       margin-left: auto;
-      aspect-ratio: 3 / 4.15;
+      aspect-ratio: var(--media-ratio);
+    }
+
+    .hero-orbit {
+      display: grid;
+      width: 78px;
+      height: 78px;
+      margin: -44px 0 0 10px;
+      border: 1px solid var(--ink);
+      border-radius: 50%;
+      place-items: center;
+      font: 500 8px/1.2 var(--ui);
+      letter-spacing: 0.12em;
+      text-align: center;
+    }
+
+    .hero-tagline {
+      max-width: 20em;
+      margin: 24px 0 0 auto;
+      color: var(--muted);
+      font: 400 0.75rem/1.6 var(--ui);
+      text-align: right;
     }
 
     .hero-footer {
@@ -601,37 +648,30 @@
     }
 
     .story-list {
-      position: relative;
       display: grid;
-      gap: 40px;
-    }
-
-    .story-list::before {
-      position: absolute;
-      top: 8px;
-      bottom: 8px;
-      left: 13px;
-      width: 1px;
-      background: var(--line);
-      content: '';
+      gap: 86px;
     }
 
     .story-item {
-      position: relative;
-      padding-left: 48px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      align-items: end;
+      gap: 22px;
     }
 
-    .story-item::before {
-      position: absolute;
-      top: 6px;
-      left: 9px;
-      width: 9px;
-      height: 9px;
-      border: 2px solid var(--paper);
-      border-radius: 50%;
-      background: var(--bronze);
-      box-shadow: 0 0 0 1px var(--bronze);
-      content: '';
+    .story-item:nth-child(even) .story-media {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .story-item:nth-child(even) .story-copy {
+      grid-column: 1;
+      grid-row: 1;
+      text-align: right;
+    }
+
+    .story-media {
+      aspect-ratio: var(--media-ratio);
     }
 
     .story-title,
@@ -1013,10 +1053,6 @@
         background: Canvas;
         forced-color-adjust: auto;
       }
-
-      .story-item::before {
-        background: CanvasText;
-      }
     }
   </style>
 </head>
@@ -1174,6 +1210,9 @@
         section.dataset.section = key;
         section.tabIndex = -1;
         const header = element('header', 'section-header');
+        const enabledKeys = Object.keys(SECTION_RENDERERS).filter(name => WEDDING_CONFIG.sections[name] === true);
+        const ordinal = enabledKeys.indexOf(key) + 1;
+        if (ordinal > 0) header.append(element('span', 'section-index', String(ordinal).padStart(2, '0')));
         if (eyebrow) header.append(element('p', 'section-eyebrow', eyebrow));
         if (title) header.append(element(headingTag, 'section-title', title));
         const body = element('div', 'section-body');
@@ -1186,16 +1225,21 @@
       }
 
       function renderHero() {
-        const section = sectionShell('hero', 'Wedding Invitation', WEDDING_CONFIG.messages.hero, 'h1');
+        const section = sectionShell('hero', 'Wedding Invitation', '', 'h1');
         const body = sectionBody(section);
+        const display = element('h1', 'hero-display');
+        WeddingUtils.toLines(WEDDING_CONFIG.messages.hero).forEach(line => display.append(element('span', '', line)));
         const media = mediaFrame(WEDDING_CONFIG.media.hero, `${WEDDING_CONFIG.couple.groom.name}과 ${WEDDING_CONFIG.couple.bride.name}의 대표 사진`, 'Main Portrait');
         media.classList.add('hero-media');
+        const orbit = element('span', 'hero-orbit', WEDDING_CONFIG.messages.heroOrbit || '');
+        orbit.setAttribute('aria-hidden', 'true');
+        const tagline = element('p', 'hero-tagline', WEDDING_CONFIG.messages.heroTagline || '');
         const footer = element('div', 'hero-footer');
         footer.append(
           element('p', 'hero-names', `${WEDDING_CONFIG.couple.groom.name} · ${WEDDING_CONFIG.couple.bride.name}`),
           element('p', 'hero-date', WEDDING_CONFIG.wedding.displayDate),
         );
-        body.append(media, footer);
+        body.append(display, media, orbit, tagline, footer);
         return section;
       }
 
@@ -1337,14 +1381,19 @@
       function renderStory() {
         const section = sectionShell('story', 'Our Story', '우리의 시간');
         const list = element('div', 'story-list');
-        WEDDING_CONFIG.story.forEach(item => {
+        WEDDING_CONFIG.story.forEach((item, index) => {
           const article = element('article', 'story-item');
-          article.append(
+          const imageSource = item.image || WEDDING_CONFIG.media.gallery[index]?.src || '';
+          const media = mediaFrame(imageSource, item.alt || item.title, `Story ${String(index + 1).padStart(2, '0')}`);
+          media.classList.add('story-media');
+          const copy = element('div', 'story-copy');
+          copy.append(
             element('p', 'story-year', item.year),
             element('p', 'story-label', item.label),
             element('h3', 'story-title', item.title),
             element('p', 'story-body', item.body),
           );
+          article.append(media, copy);
           list.append(article);
         });
         sectionBody(section).append(list);

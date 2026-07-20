@@ -424,6 +424,28 @@ test('intro and invitation share the paper canvas without a dark full-screen fla
   assert.match(html, /\.intro-skip\s*\{[\s\S]*top:\s*24px;[\s\S]*right:\s*20px;[\s\S]*rgba\(0, 0, 0, 0\.4\)/);
 });
 
+test('hero through story render the reference-aligned editorial structure', () => {
+  const html = source();
+  const app = scriptById(html, 'wedding-app');
+  const { WEDDING_CONFIG: config } = loadContracts();
+  assert.equal(config.messages.hero, 'BEGINS\nON OCT');
+  assert.equal(config.messages.heroOrbit, 'JOIN US · JOIN US ·');
+  assert.equal(config.messages.heroTagline, 'A new chapter begins with the people we love.');
+  assert.match(app, /hero-display/);
+  assert.match(app, /hero-orbit/);
+  assert.match(app, /hero-tagline/);
+  assert.match(app, /section-index/);
+  assert.match(app, /story-media/);
+  assert.match(html, /\.hero-display\s*\{[\s\S]*font-family:\s*var\(--display\)/);
+  assert.match(html, /\.invitation-section\s*\{[\s\S]*padding:[^;]*(?:96px|clamp\(96px)/);
+  assert.match(html, /\.story-item:nth-child\(even\)[\s\S]*\.story-media/);
+});
+
+test('optional story images stay inside the replaceable image folder', () => {
+  const { WEDDING_CONFIG: config } = loadContracts();
+  assert.ok(config.story.every(item => !item.image || item.image.startsWith('./assets/images/')));
+});
+
 test('intro exits to the first enabled section when hero is disabled', () => {
   const harness = createHarness({ disabledSections: ['hero'] });
   harness.app.renderSections();
