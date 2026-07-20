@@ -7,8 +7,8 @@
   <script id="wedding-config">
     const WEDDING_CONFIG = Object.freeze({
       sections: { intro: true, hero: true, invitation: true, couple: true, schedule: true, story: true, gallery: true, location: true, transportation: true, notices: true, accounts: true, share: true, outro: true },
-      theme: { paper: '#f2efe8', ink: '#20211d', muted: '#77766f', sage: '#798071', bronze: '#9a765a', maxWidth: '460px' },
-      intro: { video: './assets/video/intro.mp4', poster: './assets/images/intro-poster.jpg', eyebrow: 'WEDDING INVITATION', title: 'LOVE OF LIFE', muted: true, fallbackDelayMs: 2800 },
+      theme: { paper: '#fafafa', ink: '#252321', muted: '#77736d', sage: '#777f70', bronze: '#9d8069', maxWidth: '425px', transitionMs: 650 },
+      intro: { video: './assets/video/intro.mp4', poster: './assets/images/intro-poster.jpg', eyebrow: 'WEDDING INVITATION', title: 'LOVE OF LIFE', mediaLabel: 'BEGIN OUR DAY', muted: true, fallbackDelayMs: 2800, objectPosition: '50% 50%' },
       couple: {
         groom: { name: '김민준', englishName: 'MINJUN', phone: '010-1234-5678', parents: [{ relation: '아버지', name: '김아버지', phone: '010-1111-1111' }, { relation: '어머니', name: '박어머니', phone: '010-2222-2222' }] },
         bride: { name: '이서연', englishName: 'SEOYEON', phone: '010-9876-5432', parents: [{ relation: '아버지', name: '이아버지', phone: '010-3333-3333' }, { relation: '어머니', name: '최어머니', phone: '010-4444-4444' }] },
@@ -24,17 +24,29 @@
       sharing: { title: '김민준 ♥ 이서연 결혼식에 초대합니다', text: '2026년 10월 24일, 두 사람의 새로운 시작을 함께 축복해 주세요.' },
     });
   </script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&amp;family=Gowun+Dodum&amp;display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
   <style>
     :root {
-      --page-width: 460px;
-      --paper: #f2efe8;
-      --ink: #20211d;
-      --muted: #77766f;
-      --sage: #798071;
-      --bronze: #9a765a;
-      --line: color-mix(in srgb, var(--ink) 16%, transparent);
-      --serif: Georgia, 'Times New Roman', 'Noto Serif KR', serif;
-      --sans: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      --canvas: #eeeeee;
+      --page-width: 425px;
+      --paper: #fafafa;
+      --ink: #252321;
+      --muted: #77736d;
+      --sage: #777f70;
+      --bronze: #9d8069;
+      --line: color-mix(in srgb, var(--ink) 13%, transparent);
+      --transition-duration: 650ms;
+      --media-ratio: 3 / 4;
+      --paper-texture:
+        radial-gradient(circle at 18% 24%, rgb(72 65 56 / 3.5%) 0 0.55px, transparent 0.75px),
+        radial-gradient(circle at 76% 68%, rgb(255 255 255 / 72%) 0 0.7px, transparent 0.9px),
+        linear-gradient(112deg, rgb(255 255 255 / 20%), transparent 42%, rgb(97 86 72 / 2.5%));
+      --display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+      --korean: 'Gowun Dodum', 'Apple SD Gothic Neo', sans-serif;
+      --ui: Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+      --serif: var(--display);
+      --sans: var(--ui);
     }
 
     *,
@@ -45,7 +57,7 @@
 
     html {
       color-scheme: light;
-      background: #d8d3c8;
+      background: var(--canvas);
       scroll-behavior: smooth;
     }
 
@@ -54,7 +66,7 @@
       margin: 0;
       overflow-x: hidden;
       color: var(--ink);
-      background: #d8d3c8;
+      background: var(--canvas);
       font-family: var(--sans);
       font-size: 15px;
       line-height: 1.75;
@@ -116,10 +128,7 @@
       margin: 0 auto;
       overflow: hidden;
       background-color: var(--paper);
-      background-image:
-        radial-gradient(circle at 12% 18%, rgb(255 255 255 / 44%) 0 0.8px, transparent 1px),
-        radial-gradient(circle at 82% 64%, rgb(32 33 29 / 6%) 0 0.7px, transparent 1px),
-        linear-gradient(115deg, rgb(255 255 255 / 12%), transparent 44%, rgb(154 118 90 / 4%));
+      background-image: var(--paper-texture);
       background-size: 13px 17px, 19px 23px, 100% 100%;
       isolation: isolate;
     }
@@ -140,7 +149,7 @@
         radial-gradient(circle at 50% 38%, rgb(121 128 113 / 42%), transparent 44%),
         #171814;
       opacity: 1;
-      transition: opacity 520ms ease;
+      transition: opacity var(--transition-duration) ease;
     }
 
     .intro.is-exiting {
@@ -1472,6 +1481,8 @@
         root.style.setProperty('--muted', WEDDING_CONFIG.theme.muted);
         root.style.setProperty('--sage', WEDDING_CONFIG.theme.sage);
         root.style.setProperty('--bronze', WEDDING_CONFIG.theme.bronze);
+        const transitionMs = Number(WEDDING_CONFIG.theme.transitionMs);
+        root.style.setProperty('--transition-duration', `${Number.isFinite(transitionMs) ? Math.max(0, transitionMs) : 650}ms`);
       }
 
       function renderSections() {
@@ -1812,6 +1823,7 @@
         video.defaultMuted = video.muted;
         video.playsInline = true;
         video.preload = 'auto';
+        video.style.objectPosition = WEDDING_CONFIG.intro.objectPosition;
         if (String(WEDDING_CONFIG.intro.poster || '').trim()) video.poster = WEDDING_CONFIG.intro.poster;
 
         const updateSoundControl = () => {

@@ -271,13 +271,31 @@ function createHarness({ now = Date.now(), introEnabled = true, names } = {}) {
   };
 }
 
-test('runtime is one self-contained index without external code', () => {
+function stylesheetHrefs(html) {
+  return [...html.matchAll(/<link[^>]+rel=["']stylesheet["'][^>]+href=["']([^"']+)["']/gi)]
+    .map(match => match[1]);
+}
+
+test('runtime keeps JavaScript inline and loads styles only from approved font CDNs', () => {
   const html = source();
   assert.match(html, /<script[^>]*id="wedding-config"/);
   assert.match(html, /<script[^>]*id="wedding-utils"/);
   assert.match(html, /<script[^>]*id="wedding-app"/);
   assert.doesNotMatch(html, /<script[^>]+src=/i);
-  assert.doesNotMatch(html, /<link[^>]+rel=["']stylesheet["']/i);
+  const hosts = stylesheetHrefs(html).map(href => new URL(href).hostname);
+  assert.deepEqual(hosts.sort(), ['cdn.jsdelivr.net', 'fonts.googleapis.com']);
+});
+
+test('reference-aligned canvas tokens and editable motion defaults are configured', () => {
+  const html = source();
+  const { WEDDING_CONFIG: config } = loadContracts();
+  assert.equal(config.theme.maxWidth, '425px');
+  assert.equal(config.theme.transitionMs, 650);
+  assert.equal(config.intro.objectPosition, '50% 50%');
+  assert.match(html, /--canvas:\s*#eee(?:eee)?;/i);
+  assert.match(html, /--paper:\s*#fafafa;/i);
+  assert.match(html, /--page-width:\s*425px;/);
+  assert.match(html, /--media-ratio:\s*3\s*\/\s*4;/);
 });
 
 test('configuration exposes every section toggle', () => {
