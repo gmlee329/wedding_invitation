@@ -60,6 +60,8 @@ class FakeNode {
     this.focusCalls = [];
     this.listeners = new Map();
     this.inert = false;
+    this.playCalls = 0;
+    this.pauseCalls = 0;
   }
 
   set className(value) {
@@ -112,9 +114,13 @@ class FakeNode {
     this.focusCalls.push(options);
   }
 
-  pause() {}
+  pause() {
+    this.pauseCalls += 1;
+  }
 
-  play() {}
+  play() {
+    this.playCalls += 1;
+  }
 
   remove() {
     this.removed = true;
@@ -158,11 +164,13 @@ class FakeFragment extends FakeNode {
   }
 }
 
-function createHarness({ now = Date.now(), introEnabled = true, names } = {}) {
+function createHarness({ now = Date.now(), introEnabled = true, names, reducedMotion = true } = {}) {
   const ids = new Map();
   const documentListeners = new Map();
   const clearedIntervals = [];
   const intervals = [];
+  const timeouts = [];
+  const clearedTimeouts = [];
   let currentNow = now;
 
   const document = {
@@ -193,13 +201,15 @@ function createHarness({ now = Date.now(), introEnabled = true, names } = {}) {
   ids.set('intro-template', template);
 
   const intro = new FakeNode('div');
-  const eyebrow = new FakeNode('p');
-  eyebrow.dataset.introEyebrow = '';
-  const heading = new FakeNode('h1');
-  heading.dataset.introTitle = '';
+  const introNames = new FakeNode('span');
+  introNames.dataset.introEyebrow = '';
+  introNames.dataset.introNames = '';
+  const introMessage = new FakeNode('span');
+  introMessage.dataset.introTitle = '';
+  introMessage.dataset.introMessage = '';
   const status = new FakeNode('p');
   status.dataset.introStatus = '';
-  intro.append(eyebrow, heading, status);
+  intro.append(introNames, introMessage, status);
   ids.set('intro', intro);
 
   const video = new FakeNode('video');
@@ -224,10 +234,16 @@ function createHarness({ now = Date.now(), introEnabled = true, names } = {}) {
     clearInterval(id) {
       clearedIntervals.push(id);
     },
-    setTimeout: () => 1,
-    clearTimeout() {},
+    setTimeout(callback, delay) {
+      const id = timeouts.length + 1;
+      timeouts.push({ id, callback, delay });
+      return id;
+    },
+    clearTimeout(id) {
+      clearedTimeouts.push(id);
+    },
     requestAnimationFrame: callback => callback(),
-    matchMedia: () => ({ matches: true }),
+    matchMedia: () => ({ matches: reducedMotion }),
   };
 
   let configScript = scriptById(source(), 'wedding-config');
@@ -263,7 +279,12 @@ function createHarness({ now = Date.now(), introEnabled = true, names } = {}) {
     documentListeners,
     intervals,
     clearedIntervals,
+    timeouts,
+    clearedTimeouts,
     intro,
+    video,
+    introNames,
+    introMessage,
     skip,
     setNow(value) {
       currentNow = value;
@@ -372,6 +393,57 @@ test('schedule refreshes its countdown every second and stops after the before s
   assert.equal(afterSchedule.querySelector('.countdown-message').textContent, '함께 축복해 주셔서 감사합니다.');
 });
 
+test('intro renders configurable opening copy before delayed playback', () => {
+  const { WEDDING_CONFIG: config } = loadContracts();
+  assert.equal(config.intro.names, '규민 ♡ 사라');
+  assert.equal(config.intro.message, '결혼 여정을 시작합니다.');
+  assert.equal(config.intro.messageHoldMs, 1000);
+  assert.equal(config.intro.messageFadeMs, 600);
+
+  const harness = createHarness({ reducedMotion: false });
+  harness.app.renderIntro();
+
+  assert.equal(harness.introNames.textContent, config.intro.names);
+  assert.equal(harness.introMessage.textContent, config.intro.message);
+  assert.equal(harness.video.autoplay, false);
+  assert.equal(harness.video.playCalls, 0);
+
+  const hold = harness.timeouts.find(timeout => timeout.delay === 1000);
+  assert.ok(hold);
+  hold.callback();
+  assert.ok(harness.intro.classList.contains('is-message-fading'));
+  assert.equal(harness.video.playCalls, 0);
+
+  const fade = harness.timeouts.find(timeout => timeout.delay === 600);
+  assert.ok(fade);
+  fade.callback();
+  assert.equal(harness.video.playCalls, 1);
+  assert.equal(harness.introMessage.getAttribute('aria-hidden'), 'true');
+});
+
+test('finishing during opening copy cancels delayed playback', () => {
+  const harness = createHarness({ reducedMotion: false });
+  harness.app.renderIntro();
+  const hold = harness.timeouts.find(timeout => timeout.delay === 1000);
+
+  harness.app.finishIntro('skip');
+  hold.callback();
+
+  assert.equal(harness.video.playCalls, 0);
+  assert.ok(harness.clearedTimeouts.includes(hold.id));
+});
+
+test('reduced motion skips only the fade delay', () => {
+  const harness = createHarness({ reducedMotion: true });
+  harness.app.renderIntro();
+  const hold = harness.timeouts.find(timeout => timeout.delay === 1000);
+
+  hold.callback();
+
+  assert.equal(harness.video.playCalls, 1);
+  assert.equal(harness.timeouts.some(timeout => timeout.delay === 600), false);
+});
+
 test('intro hides and inerts the invitation, labels and focuses skip, then restores access', () => {
   const harness = createHarness();
 
@@ -445,7 +517,9 @@ test('outro reads its personal signature only from configuration', () => {
 test('intro and progressive enhancement contracts are present', () => {
   const html = source();
   const app = scriptById(html, 'wedding-app');
-  assert.match(app, /video\.autoplay\s*=\s*true/);
+  assert.match(app, /video\.autoplay\s*=\s*false/);
+  assert.doesNotMatch(html, /<video[^>]*\sautoplay(?:\s|>)/i);
+  assert.match(html, /\.intro\.is-video-playing \.intro-progress::after/);
   assert.match(app, /video\.muted\s*=/);
   assert.match(app, /video\.playsInline\s*=\s*true/);
   assert.match(html, />SKIP</);

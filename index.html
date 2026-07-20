@@ -8,7 +8,16 @@
     const WEDDING_CONFIG = Object.freeze({
       sections: { intro: true, hero: true, invitation: true, couple: true, schedule: true, story: true, gallery: true, location: true, transportation: true, notices: true, accounts: true, share: true, outro: true },
       theme: { paper: '#f2efe8', ink: '#20211d', muted: '#77766f', sage: '#798071', bronze: '#9a765a', maxWidth: '460px' },
-      intro: { video: './assets/video/intro.mp4', poster: './assets/images/intro-poster.jpg', eyebrow: 'WEDDING INVITATION', title: 'LOVE OF LIFE', muted: true, fallbackDelayMs: 2800 },
+      intro: {
+        video: './assets/video/intro.mp4',
+        poster: './assets/images/intro-poster.jpg',
+        names: '규민 ♡ 사라',
+        message: '결혼 여정을 시작합니다.',
+        messageHoldMs: 1000,
+        messageFadeMs: 600,
+        muted: true,
+        fallbackDelayMs: 2800,
+      },
       couple: {
         groom: { name: '이규민', englishName: 'GYUMIN', phone: '010-5102-0382', parents: [{ relation: '아버지', name: '이노진', phone: '010-9984-0382' }, { relation: '어머니', name: '왕정원', phone: '010-3688-0382' }] },
         bride: { name: '김사라', englishName: 'SARA', phone: '010-4605-1052', parents: [{ relation: '아버지', name: '김근권', phone: '010-0000-0000' }, { relation: '어머니', name: '문경애', phone: '010-9262-4068' }] },
@@ -179,24 +188,38 @@
 
     .intro-heading {
       display: grid;
+      margin: 0;
       place-content: center;
+      gap: 14px;
+      opacity: 1;
+      transform: translateY(0);
+      transition:
+        opacity var(--intro-message-fade-duration, 600ms) ease,
+        transform var(--intro-message-fade-duration, 600ms) ease;
     }
 
-    .intro-eyebrow {
-      margin: 0 0 15px;
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.28em;
+    .intro.is-message-fading .intro-heading {
+      opacity: 0;
+      transform: translateY(-6px);
     }
 
-    .intro-title {
-      max-width: 7em;
-      margin: 0 auto;
+    .intro.is-message-hidden .intro-heading {
+      visibility: hidden;
+    }
+
+    .intro-names {
       font-family: var(--serif);
-      font-size: clamp(3rem, 16vw, 5.4rem);
+      font-size: clamp(1.65rem, 7vw, 2.35rem);
       font-weight: 400;
-      letter-spacing: -0.06em;
-      line-height: 0.9;
+      letter-spacing: 0.04em;
+      line-height: 1.15;
+    }
+
+    .intro-message {
+      font-size: 0.88rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      line-height: 1.6;
     }
 
     .intro-actions {
@@ -220,7 +243,11 @@
       background: currentColor;
       content: '';
       transform-origin: left;
-      animation: intro-progress 8s linear infinite;
+      animation: intro-progress 8s linear infinite paused;
+    }
+
+    .intro.is-video-playing .intro-progress::after {
+      animation-play-state: running;
     }
 
     @keyframes intro-progress {
@@ -1001,13 +1028,13 @@
 <body>
   <template id="intro-template">
     <div id="intro" class="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title">
-      <video id="intro-video" class="intro-video" autoplay muted playsinline preload="auto"></video>
+      <video id="intro-video" class="intro-video" muted playsinline preload="auto"></video>
       <div class="intro-shade" aria-hidden="true"></div>
       <div class="intro-content">
-        <div class="intro-heading">
-          <p class="intro-eyebrow" data-intro-eyebrow></p>
-          <h1 id="intro-title" class="intro-title" data-intro-title></h1>
-        </div>
+        <h1 id="intro-title" class="intro-heading">
+          <span class="intro-names" data-intro-names></span>
+          <span class="intro-message" data-intro-message></span>
+        </h1>
         <div class="intro-actions">
           <div class="intro-progress" aria-hidden="true"></div>
           <button id="intro-sound" class="intro-control intro-sound" type="button"></button>
@@ -1106,6 +1133,8 @@
       let introFinished = false;
       let introFallbackTimer = 0;
       let introRemovalTimer = 0;
+      let introMessageTimer = 0;
+      let introPlaybackTimer = 0;
       let countdownTimer = 0;
       let galleryIndex = 0;
       let toastTimer = 0;
@@ -1700,6 +1729,18 @@
         reveals.forEach(node => observer.observe(node));
       }
 
+      function introDelay(value, fallback) {
+        const duration = Number(value);
+        return Number.isFinite(duration) ? Math.max(0, duration) : fallback;
+      }
+
+      function clearIntroSequenceTimers() {
+        window.clearTimeout(introMessageTimer);
+        window.clearTimeout(introPlaybackTimer);
+        introMessageTimer = 0;
+        introPlaybackTimer = 0;
+      }
+
       function scheduleIntroFallback() {
         window.clearTimeout(introFallbackTimer);
         const configuredDelay = Number(WEDDING_CONFIG.intro.fallbackDelayMs);
@@ -1708,6 +1749,7 @@
       }
 
       function handleIntroMediaError() {
+        clearIntroSequenceTimers();
         if (introFinished) return;
         const intro = document.getElementById('intro');
         if (!intro) return;
@@ -1731,6 +1773,7 @@
       }
 
       function finishIntro(reason = 'complete') {
+        clearIntroSequenceTimers();
         const app = document.getElementById('invitation-app');
         document.removeEventListener('keydown', handleIntroKeydown);
         restoreInvitationAccess(app);
@@ -1778,6 +1821,7 @@
       }
 
       function renderIntro() {
+        clearIntroSequenceTimers();
         const app = document.getElementById('invitation-app');
         document.removeEventListener('keydown', handleIntroKeydown);
         if (WEDDING_CONFIG.sections.intro !== true) {
@@ -1804,10 +1848,16 @@
           finishIntro('missing-intro');
           return;
         }
-        intro.querySelector('[data-intro-eyebrow]').textContent = WEDDING_CONFIG.intro.eyebrow;
-        intro.querySelector('[data-intro-title]').textContent = WEDDING_CONFIG.intro.title;
+        const introNames = intro.querySelector('[data-intro-names]');
+        const introMessage = intro.querySelector('[data-intro-message]');
+        if (!introNames || !introMessage) {
+          finishIntro('missing-intro-copy');
+          return;
+        }
+        introNames.textContent = WEDDING_CONFIG.intro.names;
+        introMessage.textContent = WEDDING_CONFIG.intro.message;
 
-        video.autoplay = true;
+        video.autoplay = false;
         video.muted = Boolean(WEDDING_CONFIG.intro.muted);
         video.defaultMuted = video.muted;
         video.playsInline = true;
@@ -1837,12 +1887,40 @@
           return;
         }
         video.src = WEDDING_CONFIG.intro.video;
-        try {
-          const playResult = video.play();
-          if (playResult && typeof playResult.catch === 'function') playResult.catch(handleIntroMediaError);
-        } catch (error) {
-          handleIntroMediaError();
-        }
+
+        const holdMs = introDelay(WEDDING_CONFIG.intro.messageHoldMs, 1000);
+        const fadeMs = introDelay(WEDDING_CONFIG.intro.messageFadeMs, 600);
+        const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        intro.style.setProperty('--intro-message-fade-duration', `${fadeMs}ms`);
+
+        const playVideo = () => {
+          introPlaybackTimer = 0;
+          if (introFinished || document.getElementById('intro') !== intro) return;
+          intro.classList.add('is-message-hidden');
+          introMessage.setAttribute('aria-hidden', 'true');
+          introNames.setAttribute('aria-hidden', 'true');
+          video.currentTime = 0;
+          try {
+            const playResult = video.play();
+            if (playResult && typeof playResult.catch === 'function') playResult.catch(handleIntroMediaError);
+          } catch (error) {
+            handleIntroMediaError();
+          }
+        };
+
+        const fadeMessage = () => {
+          introMessageTimer = 0;
+          if (introFinished || document.getElementById('intro') !== intro) return;
+          intro.classList.add('is-message-fading');
+          if (reducedMotion) {
+            playVideo();
+            return;
+          }
+          introPlaybackTimer = window.setTimeout(playVideo, fadeMs);
+        };
+
+        video.addEventListener('playing', () => intro.classList.add('is-video-playing'));
+        introMessageTimer = window.setTimeout(fadeMessage, holdMs);
       }
 
       function init() {
