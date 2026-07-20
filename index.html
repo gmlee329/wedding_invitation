@@ -699,7 +699,7 @@
     .gallery-grid {
       display: grid;
       grid-template-columns: repeat(12, minmax(0, 1fr));
-      gap: 8px;
+      gap: 7px;
     }
 
     .gallery-button {
@@ -730,6 +730,16 @@
       aspect-ratio: 3 / 4.45;
     }
 
+    .location-section .section-body {
+      margin-inline: calc(clamp(24px, 7vw, 34px) * -1);
+    }
+
+    .location-address,
+    .location-section .address-copy-button,
+    .location-section .venue-phone {
+      margin-inline: auto;
+    }
+
     .location-address {
       margin: 0;
       text-align: center;
@@ -751,6 +761,7 @@
     }
 
     .map-media {
+      margin-top: 34px;
       aspect-ratio: 4 / 3;
     }
 
@@ -772,10 +783,12 @@
       gap: 12px;
     }
 
-    .transport-item,
-    .notice-card {
-      padding: 26px 24px;
+    .transport-item {
+      display: grid;
+      padding: 22px 0;
       border-top: 1px solid var(--line);
+      grid-template-columns: 88px 1fr;
+      gap: 18px;
     }
 
     .transport-lines {
@@ -783,8 +796,10 @@
     }
 
     .notice-card {
-      border: 1px solid var(--line);
-      background: rgb(255 255 255 / 15%);
+      padding: 28px 0;
+      border: 0;
+      border-top: 1px solid var(--line);
+      background: transparent;
     }
 
     .account-groups {
@@ -794,7 +809,6 @@
 
     .account-group {
       border-top: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
     }
 
     .account-group summary {
@@ -851,7 +865,8 @@
       padding: 4px 10px;
     }
 
-    .share-panel {
+    .share-section,
+    .outro-section {
       text-align: center;
     }
 
@@ -865,17 +880,17 @@
 
     .outro-section {
       display: flex;
-      min-height: 72svh;
+      min-height: 90svh;
       flex-direction: column;
       justify-content: center;
-      text-align: center;
     }
 
     .outro-lines {
       display: grid;
       gap: 4px;
-      font-family: var(--serif);
-      font-size: 1.13rem;
+      font-family: var(--display);
+      font-size: clamp(2.6rem, 12vw, 4rem);
+      line-height: 0.98;
     }
 
     .outro-lines p {
@@ -1155,9 +1170,9 @@
         couple: renderCouple,
         schedule: renderSchedule,
         story: renderStory,
-        gallery: renderGallery,
         location: renderLocation,
         transportation: renderTransportation,
+        gallery: renderGallery,
         notices: renderNotices,
         accounts: renderAccounts,
         share: renderShare,

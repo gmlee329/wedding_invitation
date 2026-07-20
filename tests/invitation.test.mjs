@@ -441,6 +441,20 @@ test('hero through story render the reference-aligned editorial structure', () =
   assert.match(html, /\.story-item:nth-child\(even\)[\s\S]*\.story-media/);
 });
 
+test('sections follow the reference narrative order and keep lower-page interactions', () => {
+  const html = source();
+  const app = scriptById(html, 'wedding-app');
+  const order = ['hero', 'invitation', 'couple', 'schedule', 'story', 'location', 'transportation', 'gallery', 'notices', 'accounts', 'share', 'outro'];
+  const positions = order.map(key => app.indexOf(`${key}: render`));
+  assert.ok(positions.every(position => position >= 0));
+  assert.deepEqual([...positions].sort((a, b) => a - b), positions);
+  assert.match(html, /\.gallery-grid\s*\{[\s\S]*grid-template-columns:\s*repeat\(12/);
+  assert.match(html, /\.location-section \.section-body[\s\S]*margin-inline:/);
+  assert.match(html, /\.account-group\s*\{[\s\S]*border-top:/);
+  assert.match(app, /navigator\.share/);
+  assert.match(app, /dataset\.copyAccount/);
+});
+
 test('optional story images stay inside the replaceable image folder', () => {
   const { WEDDING_CONFIG: config } = loadContracts();
   assert.ok(config.story.every(item => !item.image || item.image.startsWith('./assets/images/')));
