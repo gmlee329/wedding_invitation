@@ -453,6 +453,22 @@ test('intro renders configurable signature before delayed playback', () => {
   assert.equal(harness.intro.classList.contains('is-video-playing'), true);
 });
 
+test('intro error after playback restores the paper fallback', () => {
+  const harness = createHarness();
+  harness.app.renderIntro();
+
+  const [handlePlaying] = harness.video.listeners.get('playing') || [];
+  assert.ok(handlePlaying);
+  handlePlaying();
+  assert.equal(harness.intro.classList.contains('is-video-playing'), true);
+
+  const [handleError] = harness.video.listeners.get('error') || [];
+  assert.ok(handleError);
+  handleError();
+  assert.equal(harness.intro.classList.contains('has-media-error'), true);
+  assert.equal(harness.intro.classList.contains('is-video-playing'), false);
+});
+
 test('finishing during opening copy cancels delayed playback', () => {
   const harness = createHarness({ reducedMotion: false });
   harness.app.renderIntro();

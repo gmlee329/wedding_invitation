@@ -1762,6 +1762,7 @@
         if (introFinished) return;
         const intro = document.getElementById('intro');
         if (!intro) return;
+        intro.classList.remove('is-video-playing');
         intro.classList.add('has-media-error');
         const skip = document.getElementById('intro-skip');
         if (skip) skip.textContent = '청첩장 보기';
