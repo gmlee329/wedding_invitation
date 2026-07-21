@@ -1007,27 +1007,6 @@
       }
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      html {
-        scroll-behavior: auto;
-      }
-
-      *,
-      *::before,
-      *::after {
-        scroll-behavior: auto !important;
-        transition-duration: 0.01ms !important;
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-      }
-
-      .has-reveal-motion .reveal,
-      .has-reveal-motion .reveal.is-visible {
-        opacity: 1;
-        transform: none;
-      }
-    }
-
     @media (forced-colors: active) {
       .media-placeholder,
       .calendar [aria-current='date'],
@@ -1734,8 +1713,7 @@
 
       function initRevealMotion() {
         const reveals = [...document.querySelectorAll('.reveal')];
-        const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (reducedMotion || typeof window.IntersectionObserver !== 'function') {
+        if (typeof window.IntersectionObserver !== 'function') {
           reveals.forEach(node => node.classList.add('is-visible'));
           return;
         }
@@ -1834,13 +1812,7 @@
           if (event.target === intro && event.propertyName === 'opacity') removeIntro();
         };
         intro.addEventListener('transitionend', onTransitionEnd);
-
-        const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (reducedMotion) {
-          removeIntro();
-        } else {
-          introRemovalTimer = window.setTimeout(removeIntro, 700);
-        }
+        introRemovalTimer = window.setTimeout(removeIntro, 700);
       }
 
       function renderIntro() {
@@ -1918,7 +1890,6 @@
 
         const holdMs = introDelay(WEDDING_CONFIG.intro.messageHoldMs, 1000);
         const fadeMs = introDelay(WEDDING_CONFIG.intro.messageFadeMs, 600);
-        const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         intro.style.setProperty('--intro-message-fade-duration', `${fadeMs}ms`);
 
         const playVideo = () => {
@@ -1939,10 +1910,6 @@
           introMessageTimer = 0;
           if (introFinished || document.getElementById('intro') !== intro) return;
           intro.classList.add('is-message-fading');
-          if (reducedMotion) {
-            playVideo();
-            return;
-          }
           introPlaybackTimer = window.setTimeout(playVideo, fadeMs);
         };
 
