@@ -12,8 +12,9 @@
 
 - Apply `'Courgette', cursive` only to `.intro-name` and `.hero-section .section-title`.
 - Keep one external stylesheet and remove every Allura reference.
-- Preserve the existing font sizes, weights, letter spacing, line height, width, colors, layout, animation, and media behavior except for adding `white-space: nowrap` to the hero title.
-- Keep `Happily Ever After` on one line without horizontal page overflow at 375px viewport width.
+- Preserve the intro font size and both titles' weights, letter spacing, line height, colors, surrounding layout, animation, and media behavior.
+- Size the hero title for Courgette with `max-width: 100%` and `font-size: clamp(1.75rem, 9vw, 2.6rem)`.
+- Keep `Happily Ever After` fully visible on one line without horizontal page overflow at 320px and 375px viewport widths.
 - Do not stage or push `assets/video/intro.original.mp4`.
 - Push the verified commits directly to `origin/main`.
 
@@ -41,7 +42,7 @@ assert.match(stylesheets[0], /https:\/\/fonts\.googleapis\.com\/css2\?family=Cou
 Add:
 
 ```javascript
-test('courgette is limited to the intro names and hero title at existing sizes', () => {
+test('script titles use courgette with responsive hero sizing', () => {
   const html = source();
   assert.doesNotMatch(html, /Allura/);
   assert.match(
@@ -50,7 +51,7 @@ test('courgette is limited to the intro names and hero title at existing sizes',
   );
   assert.match(
     html,
-    /\.hero-section \.section-title\s*\{[^}]*font-family:\s*'Courgette',\s*cursive;[^}]*font-size:\s*clamp\(3\.1rem,\s*16vw,\s*5\.1rem\);[^}]*white-space:\s*nowrap;/,
+    /\.hero-section \.section-title\s*\{[^}]*max-width:\s*100%;[^}]*font-family:\s*'Courgette',\s*cursive;[^}]*font-size:\s*clamp\(1\.75rem,\s*9vw,\s*2\.6rem\);[^}]*white-space:\s*nowrap;/,
   );
 });
 ```
@@ -99,9 +100,11 @@ in `.intro-name` and `.hero-section .section-title`. Do not modify any adjacent 
 
 - [ ] **Step 3: Prevent the hero title from wrapping**
 
-Add only this declaration to `.hero-section .section-title`:
+Replace `max-width: 7em` and the existing hero font-size, then add the no-wrap declaration:
 
 ```css
+max-width: 100%;
+font-size: clamp(1.75rem, 9vw, 2.6rem);
 white-space: nowrap;
 ```
 
@@ -147,12 +150,13 @@ git commit -m "style: use courgette for invitation script"
 
 - [ ] **Step 1: Verify the real page at 375×812**
 
-Serve the repository locally and inspect the page at iPhone 11 Pro dimensions. Confirm:
+Serve the repository locally and inspect the page at 320×812 and iPhone 11 Pro dimensions. Confirm:
 
 - `Gyumin & Sara` and `Happily Ever After` compute to `Courgette, cursive`.
 - `Happily Ever After` has `white-space: nowrap` and renders as one line.
+- The hero title's `scrollWidth` does not exceed its `clientWidth`, so no letters are clipped.
 - The root has no horizontal overflow.
-- Both phrases retain their prior font sizes and line heights.
+- The intro phrase retains its prior font size; both phrases retain their prior line heights.
 - Colors, section spacing, video, transitions, and remaining fonts are unchanged.
 
 - [ ] **Step 2: Run complete regression checks**
