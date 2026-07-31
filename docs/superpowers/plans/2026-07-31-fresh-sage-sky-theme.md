@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- Use paper `#EFFBFD`, ink `#244346`, muted `#6B8586`, green `#4F8178`, sky `#CDEDF4`, and soft green `#B8D8CB`.
+- Use paper `#EFFBFD`, ink `#244346`, muted `#6B8586`, green `#497A71`, sky `#CDEDF4`, and soft green `#B8D8CB`.
 - Apply only color-related changes.
 - Preserve Allura, Georgia, and the existing system Korean font stack.
 - Preserve every font size, weight, letter spacing, line height, layout dimension, radius, spacing, animation, and video behavior.
@@ -53,7 +53,7 @@ const { WEDDING_CONFIG: config } = loadContracts();
 assert.equal(config.theme.paper, '#effbfd');
 assert.equal(config.theme.ink, '#244346');
 assert.equal(config.theme.muted, '#6b8586');
-assert.equal(config.theme.green, '#4f8178');
+assert.equal(config.theme.green, '#497a71');
 assert.equal(config.theme.sky, '#cdedf4');
 assert.equal(config.theme.softGreen, '#b8d8cb');
 assert.equal(Object.hasOwn(config.theme, 'bronze'), false);
@@ -61,7 +61,7 @@ assert.equal(Object.hasOwn(config.theme, 'bronze'), false);
 const harness = createHarness({ introEnabled: false });
 harness.app.init();
 assert.equal(harness.document.documentElement.style.getPropertyValue('--paper'), '#effbfd');
-assert.equal(harness.document.documentElement.style.getPropertyValue('--green'), '#4f8178');
+assert.equal(harness.document.documentElement.style.getPropertyValue('--green'), '#497a71');
 assert.equal(harness.document.documentElement.style.getPropertyValue('--sky'), '#cdedf4');
 assert.equal(harness.document.documentElement.style.getPropertyValue('--soft-green'), '#b8d8cb');
 
@@ -107,7 +107,7 @@ The test stays red until Task 2 provides the production palette.
 Use:
 
 ```javascript
-theme: { paper: '#effbfd', ink: '#244346', muted: '#6b8586', green: '#4f8178', sky: '#cdedf4', softGreen: '#b8d8cb', maxWidth: '460px' },
+theme: { paper: '#effbfd', ink: '#244346', muted: '#6b8586', green: '#497a71', sky: '#cdedf4', softGreen: '#b8d8cb', maxWidth: '460px' },
 ```
 
 Use matching initial CSS:
@@ -116,7 +116,7 @@ Use matching initial CSS:
 --paper: #effbfd;
 --ink: #244346;
 --muted: #6b8586;
---green: #4f8178;
+--green: #497a71;
 --sky: #cdedf4;
 --soft-green: #b8d8cb;
 ```
@@ -134,7 +134,7 @@ Keep `--page-width`, `--line`, `--serif`, and `--sans` unchanged.
 Use token-based color layers without changing any dimensions or declarations unrelated to color:
 
 ```css
-linear-gradient(115deg, rgb(255 255 255 / 12%), transparent 44%, rgb(79 129 120 / 5%))
+linear-gradient(115deg, rgb(255 255 255 / 12%), transparent 44%, rgb(73 122 113 / 5%))
 ```
 
 ```css
@@ -144,11 +144,11 @@ background: linear-gradient(145deg, var(--sky), var(--soft-green) 48%, color-mix
 ```css
 background:
   radial-gradient(circle at 32% 28%, rgb(255 255 255 / 48%), transparent 24%),
-  linear-gradient(135deg, rgb(79 129 120 / 16%), transparent 52%),
+  linear-gradient(135deg, rgb(73 122 113 / 16%), transparent 52%),
   linear-gradient(30deg, var(--sky), var(--soft-green));
 ```
 
-Change account-row tint to `rgb(79 129 120 / 8%)`, modal and page shadows to ink-derived RGB values, and keep existing alpha values, blur radii, offsets, and border radii unchanged.
+Change account-row tint to `rgb(73 122 113 / 8%)`, modal and page shadows to ink-derived RGB values, and keep existing alpha values, blur radii, offsets, and border radii unchanged.
 
 - [ ] **Step 4: Update runtime token application**
 
@@ -221,7 +221,7 @@ Run a static HTTP server rooted at the repository and load `index.html`.
 Set the browser viewport to 375×812 and confirm:
 
 - Computed paper background is `rgb(239, 251, 253)`.
-- `Wedding Invitation`, `Invitation`, and `Bride & Groom` share the green `rgb(79, 129, 120)`.
+- `Wedding Invitation`, `Invitation`, and `Bride & Groom` share the green `rgb(73, 122, 113)`.
 - The photo and gallery fallbacks use sky and soft-green gradients with no brown tones.
 - Buttons, timeline dots, account controls, focus color, and labels use the green family.
 - Allura and Georgia font declarations, type sizes, spacing, layout, and animations remain visually unchanged.
