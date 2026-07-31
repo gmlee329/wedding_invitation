@@ -18,7 +18,6 @@
         message: '결혼 여정을 시작합니다.',
         messageHoldMs: 1000,
         messageFadeMs: 600,
-        muted: true,
         fallbackDelayMs: 2800,
       },
       couple: {
@@ -176,11 +175,70 @@
       visibility: visible;
     }
 
+    .intro.is-manual-playback .intro-video {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .intro-play {
+      position: absolute;
+      z-index: 2;
+      top: 50%;
+      left: 50%;
+      display: grid;
+      min-width: 180px;
+      min-height: 96px;
+      padding: 12px 18px;
+      border: 1px solid rgb(32 33 29 / 28%);
+      border: 1px solid color-mix(in srgb, var(--ink) 28%, transparent);
+      border-radius: 999px;
+      align-content: center;
+      justify-items: center;
+      gap: 6px;
+      color: var(--ink);
+      background: rgb(242 239 232 / 92%);
+      background: color-mix(in srgb, var(--paper) 88%, transparent);
+      box-shadow: 0 10px 34px rgb(32 33 29 / 16%);
+      cursor: pointer;
+      transform: translate(-50%, -50%);
+    }
+
+    .intro-play[hidden] {
+      display: none;
+    }
+
+    .intro-play-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .intro-play-icon {
+      display: grid;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      color: var(--paper);
+      background: var(--ink);
+      font-size: 0.72rem;
+      place-items: center;
+    }
+
+    .intro-play-help {
+      font-size: 0.64rem;
+      font-weight: 500;
+      letter-spacing: 0;
+    }
+
     .intro-content {
       position: relative;
       z-index: 1;
       display: grid;
       width: min(calc(100% - 48px), 420px);
+      min-height: 100vh;
       min-height: 100svh;
       padding: 64px 0 38px;
       grid-template-rows: 1fr auto;
@@ -285,8 +343,9 @@
       letter-spacing: 0.14em;
     }
 
-    .intro-sound {
-      justify-self: start;
+    #intro-skip {
+      grid-column: 2;
+      justify-self: end;
     }
 
     .intro-status {
@@ -1029,6 +1088,13 @@
       <div class="intro-content">
         <div class="intro-stage">
           <video id="intro-video" class="intro-video" muted playsinline preload="auto"></video>
+          <button id="intro-play" class="intro-play" type="button" aria-label="인트로 영상 재생" hidden>
+            <span class="intro-play-label">
+              <span class="intro-play-icon" aria-hidden="true">▶</span>
+              영상 재생
+            </span>
+            <span class="intro-play-help">자동재생이 안 되면 한 번 눌러주세요</span>
+          </button>
           <h1 id="intro-title" class="intro-heading">
             <span class="intro-name" data-intro-groom></span>
             <span class="intro-connector" data-intro-connector></span>
@@ -1038,7 +1104,6 @@
         </div>
         <div class="intro-actions">
           <div class="intro-progress" aria-hidden="true"></div>
-          <button id="intro-sound" class="intro-control intro-sound" type="button"></button>
           <button id="intro-skip" class="intro-control" type="button" aria-label="인트로 건너뛰기">SKIP</button>
           <p class="intro-status" data-intro-status aria-live="polite"></p>
         </div>
@@ -1754,11 +1819,17 @@
         const intro = document.getElementById('intro');
         if (!intro) return;
         intro.classList.remove('is-video-playing');
+        intro.classList.remove('is-manual-playback');
         intro.classList.add('has-media-error');
+        const play = document.getElementById('intro-play');
+        if (play) play.hidden = true;
         const skip = document.getElementById('intro-skip');
         if (skip) skip.textContent = '청첩장 보기';
         const status = intro.querySelector('[data-intro-status]');
-        if (status) status.textContent = `인트로 영상을 불러올 수 없습니다: ${WEDDING_CONFIG.intro.video}`;
+        if (status) {
+          status.classList.remove('visually-hidden');
+          status.textContent = `인트로 영상을 불러올 수 없습니다: ${WEDDING_CONFIG.intro.video}`;
+        }
         scheduleIntroFallback();
       }
 
@@ -1837,9 +1908,9 @@
 
         const intro = document.getElementById('intro');
         const video = document.getElementById('intro-video');
+        const play = document.getElementById('intro-play');
         const skip = document.getElementById('intro-skip');
-        const sound = document.getElementById('intro-sound');
-        if (!intro || !video || !skip || !sound) {
+        if (!intro || !video || !play || !skip) {
           finishIntro('missing-intro');
           return;
         }
@@ -1858,25 +1929,45 @@
         introMessage.textContent = WEDDING_CONFIG.intro.message;
 
         video.autoplay = false;
-        video.muted = Boolean(WEDDING_CONFIG.intro.muted);
-        video.defaultMuted = video.muted;
+        video.muted = true;
+        video.defaultMuted = true;
         video.playsInline = true;
         video.preload = 'auto';
         if (String(WEDDING_CONFIG.intro.poster || '').trim()) video.poster = WEDDING_CONFIG.intro.poster;
 
-        const updateSoundControl = () => {
-          sound.textContent = video.muted ? 'SOUND ON' : 'SOUND OFF';
-          sound.setAttribute('aria-pressed', String(!video.muted));
-          sound.setAttribute('aria-label', video.muted ? '인트로 영상 소리 켜기' : '인트로 영상 소리 끄기');
-        };
-        updateSoundControl();
-
         skip.setAttribute('aria-label', '인트로 건너뛰기');
         skip.addEventListener('click', () => finishIntro('skip'));
-        sound.addEventListener('click', () => {
-          video.muted = !video.muted;
-          updateSoundControl();
-        });
+        const status = intro.querySelector('[data-intro-status]');
+
+        const showIntroManualPlayback = () => {
+          if (introFinished || document.getElementById('intro') !== intro) return;
+          intro.classList.remove('is-video-playing');
+          intro.classList.remove('has-media-error');
+          intro.classList.add('is-manual-playback');
+          play.hidden = false;
+          if (status) {
+            status.classList.add('visually-hidden');
+            status.textContent = '자동재생이 안 되면 한 번 눌러주세요';
+          }
+          play.focus({ preventScroll: true });
+        };
+
+        const attemptIntroPlayback = ({ manual = false } = {}) => {
+          try {
+            const playResult = video.play();
+            if (playResult && typeof playResult.catch === 'function') {
+              playResult.catch(() => {
+                if (manual) handleIntroMediaError();
+                else showIntroManualPlayback();
+              });
+            }
+          } catch (error) {
+            if (manual) handleIntroMediaError();
+            else showIntroManualPlayback();
+          }
+        };
+
+        play.addEventListener('click', () => attemptIntroPlayback({ manual: true }));
         video.addEventListener('ended', () => finishIntro('ended'));
         video.addEventListener('error', handleIntroMediaError);
         document.addEventListener('keydown', handleIntroKeydown);
@@ -1890,7 +1981,10 @@
 
         const holdMs = introDelay(WEDDING_CONFIG.intro.messageHoldMs, 1000);
         const fadeMs = introDelay(WEDDING_CONFIG.intro.messageFadeMs, 600);
-        intro.style.setProperty('--intro-message-fade-duration', `${fadeMs}ms`);
+        const reduceMotion = typeof window.matchMedia === 'function'
+          && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const effectiveFadeMs = reduceMotion ? 0 : fadeMs;
+        intro.style.setProperty('--intro-message-fade-duration', `${effectiveFadeMs}ms`);
 
         const playVideo = () => {
           introPlaybackTimer = 0;
@@ -1898,22 +1992,30 @@
           intro.classList.add('is-message-hidden');
           introHeading.setAttribute('aria-hidden', 'true');
           video.currentTime = 0;
-          try {
-            const playResult = video.play();
-            if (playResult && typeof playResult.catch === 'function') playResult.catch(handleIntroMediaError);
-          } catch (error) {
-            handleIntroMediaError();
-          }
+          attemptIntroPlayback();
         };
 
         const fadeMessage = () => {
           introMessageTimer = 0;
           if (introFinished || document.getElementById('intro') !== intro) return;
           intro.classList.add('is-message-fading');
-          introPlaybackTimer = window.setTimeout(playVideo, fadeMs);
+          if (effectiveFadeMs === 0) {
+            playVideo();
+            return;
+          }
+          introPlaybackTimer = window.setTimeout(playVideo, effectiveFadeMs);
         };
 
-        video.addEventListener('playing', () => intro.classList.add('is-video-playing'));
+        video.addEventListener('playing', () => {
+          intro.classList.remove('is-manual-playback');
+          intro.classList.remove('has-media-error');
+          intro.classList.add('is-video-playing');
+          play.hidden = true;
+          if (status) {
+            status.classList.remove('visually-hidden');
+            status.textContent = '';
+          }
+        });
         introMessageTimer = window.setTimeout(fadeMessage, holdMs);
       }
 
