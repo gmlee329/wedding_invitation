@@ -17,7 +17,7 @@
         brideName: 'Sara',
         message: '결혼 여정을 시작합니다.',
         messageHoldMs: 1000,
-        messageFadeMs: 600,
+        messageFadeMs: 1200,
         fallbackDelayMs: 2800,
       },
       couple: {
@@ -167,6 +167,7 @@
       height: 100%;
       object-fit: contain;
       opacity: 0;
+      transition: opacity var(--intro-message-fade-duration, 1200ms) ease;
       visibility: hidden;
     }
 
@@ -258,8 +259,8 @@
       opacity: 1;
       transform: translateY(0);
       transition:
-        opacity var(--intro-message-fade-duration, 600ms) ease,
-        transform var(--intro-message-fade-duration, 600ms) ease;
+        opacity var(--intro-message-fade-duration, 1200ms) ease,
+        transform var(--intro-message-fade-duration, 1200ms) ease;
     }
 
     .intro.is-message-fading .intro-heading {
@@ -1974,30 +1975,30 @@
         video.src = WEDDING_CONFIG.intro.video;
 
         const holdMs = introDelay(WEDDING_CONFIG.intro.messageHoldMs, 1000);
-        const fadeMs = introDelay(WEDDING_CONFIG.intro.messageFadeMs, 600);
+        const fadeMs = introDelay(WEDDING_CONFIG.intro.messageFadeMs, 1200);
         const reduceMotion = typeof window.matchMedia === 'function'
           && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const effectiveFadeMs = reduceMotion ? 0 : fadeMs;
         intro.style.setProperty('--intro-message-fade-duration', `${effectiveFadeMs}ms`);
 
-        const playVideo = () => {
+        const completeMessageFade = () => {
           introPlaybackTimer = 0;
           if (introFinished || document.getElementById('intro') !== intro) return;
           intro.classList.add('is-message-hidden');
           introHeading.setAttribute('aria-hidden', 'true');
-          video.currentTime = 0;
-          attemptIntroPlayback();
         };
 
         const fadeMessage = () => {
           introMessageTimer = 0;
           if (introFinished || document.getElementById('intro') !== intro) return;
           intro.classList.add('is-message-fading');
+          video.currentTime = 0;
+          attemptIntroPlayback();
           if (effectiveFadeMs === 0) {
-            playVideo();
+            completeMessageFade();
             return;
           }
-          introPlaybackTimer = window.setTimeout(playVideo, effectiveFadeMs);
+          introPlaybackTimer = window.setTimeout(completeMessageFade, effectiveFadeMs);
         };
 
         video.addEventListener('playing', () => {
