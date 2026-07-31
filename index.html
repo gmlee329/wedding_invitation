@@ -356,15 +356,37 @@
       padding: clamp(72px, 20vw, 112px) clamp(24px, 8vw, 44px);
     }
 
-    .has-reveal-motion .reveal {
+    .has-reveal-motion .reveal .section-header,
+    .has-reveal-motion .reveal .section-body {
       opacity: 0;
-      transform: translateY(26px);
-      transition: opacity 720ms ease, transform 720ms ease;
+      transition-property: opacity, transform;
+      transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    .has-reveal-motion .reveal.is-visible {
+    .has-reveal-motion .reveal .section-header {
+      transform: translateY(36px);
+      transition-duration: 1100ms;
+    }
+
+    .has-reveal-motion .reveal .section-body {
+      transform: translateY(30px);
+      transition-duration: 1250ms;
+      transition-delay: 180ms;
+    }
+
+    .has-reveal-motion .reveal.is-visible .section-header,
+    .has-reveal-motion .reveal.is-visible .section-body {
       opacity: 1;
       transform: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .has-reveal-motion .reveal .section-header,
+      .has-reveal-motion .reveal .section-body {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
     }
 
     .invitation-section + .invitation-section::before {
@@ -1773,7 +1795,9 @@
 
       function initRevealMotion() {
         const reveals = [...document.querySelectorAll('.reveal')];
-        if (typeof window.IntersectionObserver !== 'function') {
+        const reduceMotion = typeof window.matchMedia === 'function'
+          && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (typeof window.IntersectionObserver !== 'function' || reduceMotion) {
           reveals.forEach(node => node.classList.add('is-visible'));
           return;
         }
