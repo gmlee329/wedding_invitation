@@ -2214,6 +2214,15 @@
         app.removeAttribute('aria-hidden');
       }
 
+      function resetScrollPosition() {
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        const root = document.documentElement;
+        const scrollBehavior = root.style.scrollBehavior;
+        root.style.scrollBehavior = 'auto';
+        window.scrollTo(0, 0);
+        root.style.scrollBehavior = scrollBehavior || '';
+      }
+
       function finishIntro(reason = 'complete') {
         clearIntroSequenceTimers();
         stopIntroProgressSync();
@@ -2222,6 +2231,7 @@
         restoreInvitationAccess(app);
         if (introFinished) return;
         introFinished = true;
+        resetScrollPosition();
         window.clearTimeout(introFallbackTimer);
         window.clearTimeout(introRemovalTimer);
         document.body.classList.remove('is-intro-open');
@@ -2425,6 +2435,7 @@
       }
 
       function init() {
+        resetScrollPosition();
         document.title = `${WEDDING_CONFIG.couple.groom.name} ♥ ${WEDDING_CONFIG.couple.bride.name} 결혼식에 초대합니다`;
         applyTheme();
         document.body.classList.add('has-reveal-motion');
