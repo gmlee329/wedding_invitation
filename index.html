@@ -51,9 +51,16 @@
     :root {
       --page-width: 460px;
       --paper: #f2f8ff; /* 전체 배경색: 이 값만 변경하세요 */
-      --reveal-duration: 2000ms; /* 글씨 등장 속도: 숫자가 클수록 천천히 나타납니다 */
+      --reveal-duration: 1800ms; /* 글씨 등장 속도: 숫자가 클수록 천천히 나타납니다 */
       --reveal-distance: 40px; /* 글씨 상승 거리: 숫자가 작을수록 차분하게 움직입니다 */
-      --reveal-body-delay: 300ms; /* 본문 시작 간격: 숫자가 클수록 늦게 시작합니다 */
+      --reveal-body-delay: 200ms; /* 본문 시작 간격: 숫자가 클수록 늦게 시작합니다 */
+      --gallery-gather-duration: 1700ms; /* 흩어진 사진 한 장이 가운데로 이동하는 시간: 숫자가 클수록 천천히 모입니다 */
+      --gallery-gather-stagger-max: 520ms; /* 사진별 출발 시간 차이의 최댓값: 숫자가 클수록 한 장씩 모이는 느낌이 강해집니다 */
+      --gallery-expand-duration: 1000ms; /* 모인 첫 사진이 원래 갤러리 크기로 커지는 시간: 숫자가 클수록 천천히 커집니다 */
+      --gallery-reveal-duration: 1200ms; /* 확대 후 원래 갤러리가 나타나는 시간: 숫자가 클수록 천천히 나타납니다 */
+      --gallery-photo-border: 1px solid rgb(255 255 255 / 70%); /* 갤러리 사진 테두리: 테두리를 없애려면 이 값을 none으로 바꾸세요 */
+      --gallery-control-color: rgb(57 67 69 / 62%); /* 갤러리 화살표·닫기·사진 번호 색상: 진하기는 마지막 62%를 조절하세요 */
+      --gallery-lightbox-fade-duration: 500ms; /* 사진 확대·닫기 페이드 시간: 숫자가 클수록 천천히 전환됩니다 */
       --ink: #244346;
       --muted: #6b8586;
       --green: #497a71;
@@ -773,6 +780,68 @@
       touch-action: pan-y;
     }
 
+    .gallery-opening {
+      position: absolute;
+      z-index: 20;
+      inset: 0;
+      transition: opacity var(--gallery-reveal-duration) cubic-bezier(.22, 1, .36, 1);
+    }
+
+    .gallery-opening-card {
+      position: absolute;
+      top: calc(50% + var(--gallery-opening-y));
+      left: calc(50% + var(--gallery-opening-x));
+      width: min(42%, 184px);
+      max-width: 184px;
+      overflow: hidden;
+      aspect-ratio: 2 / 3;
+      border: var(--gallery-photo-border);
+      border-radius: 2px;
+      opacity: .96;
+      background: linear-gradient(145deg, var(--sky), var(--soft-green));
+      box-shadow: 0 14px 32px rgb(36 67 70 / 17%);
+      transform: translate(-50%, -50%) rotate(var(--gallery-opening-rotation)) scale(var(--gallery-opening-scale));
+      transition:
+        top var(--gallery-gather-duration) cubic-bezier(.22, 1, .36, 1),
+        left var(--gallery-gather-duration) cubic-bezier(.22, 1, .36, 1),
+        width var(--gallery-gather-duration) cubic-bezier(.22, 1, .36, 1),
+        max-width var(--gallery-gather-duration) cubic-bezier(.22, 1, .36, 1),
+        border-color var(--gallery-gather-duration) ease,
+        opacity var(--gallery-gather-duration) ease,
+        box-shadow var(--gallery-gather-duration) ease,
+        transform var(--gallery-gather-duration) cubic-bezier(.22, 1, .36, 1);
+      transition-delay: var(--gallery-opening-delay);
+    }
+
+    .gallery-opening-card img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .gallery-opening-button {
+      position: absolute;
+      z-index: 100;
+      top: 50%;
+      left: 50%;
+      min-width: 132px;
+      min-height: 48px;
+      padding: 0 22px;
+      border: 1px solid rgb(255 255 255 / 82%);
+      border-radius: 999px;
+      color: var(--ink);
+      background: rgb(255 255 255 / 90%);
+      box-shadow: 0 10px 28px rgb(36 67 70 / 22%);
+      cursor: pointer;
+      font-size: .84rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      transform: translate(-50%, -50%);
+      transition: opacity 420ms ease, transform 620ms cubic-bezier(.22, 1, .36, 1);
+      backdrop-filter: blur(8px);
+    }
+
     .gallery-card {
       position: absolute;
       z-index: 0;
@@ -807,7 +876,7 @@
     }
 
     .gallery-card[data-gallery-position='current'] .media-frame {
-      border: 1px solid rgb(255 255 255 / 70%);
+      border: var(--gallery-photo-border);
     }
 
     .gallery-card[data-gallery-position='previous'],
@@ -842,8 +911,8 @@
       top: 12px;
       right: 12px;
       padding: 5px 8px;
-      color: rgb(255 255 255 / 92%);
-      background: rgb(26 43 44 / 24%);
+      color: var(--gallery-control-color);
+      background: rgb(255 255 255 / 38%);
       font-size: .62rem;
       font-weight: 600;
       letter-spacing: .08em;
@@ -866,22 +935,23 @@
     .gallery-nav,
     .lightbox-control {
       display: grid;
-      width: 38px;
-      height: 38px;
-      min-width: 38px;
-      min-height: 38px;
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
       padding: 0 0 3px;
-      border: 1px solid rgb(255 255 255 / 46%);
-      border-radius: 50%;
+      border: 0;
+      border-radius: 0;
       place-items: center;
-      color: white;
-      background: rgb(255 255 255 / 44%);
-      box-shadow: 0 8px 22px rgb(36 67 70 / 15%);
+      color: var(--gallery-control-color);
+      background: transparent;
+      box-shadow: none;
       cursor: pointer;
       font-family: var(--serif);
       font-size: 1.75rem;
       line-height: 1;
-      backdrop-filter: blur(7px);
+      text-shadow: 0 1px 3px rgb(255 255 255 / 86%);
+      backdrop-filter: none;
     }
 
     .gallery-nav {
@@ -896,6 +966,87 @@
 
     .gallery-stage.is-single .gallery-nav {
       display: none;
+    }
+
+    .gallery-stage[data-gallery-opening-phase]:not([data-gallery-opening-phase='opened']) > .gallery-card,
+    .gallery-stage[data-gallery-opening-phase]:not([data-gallery-opening-phase='opened']) > .gallery-nav {
+      pointer-events: none;
+    }
+
+    .gallery-stage[data-gallery-opening-phase='scattered'] > .gallery-card,
+    .gallery-stage[data-gallery-opening-phase='scattered'] > .gallery-nav,
+    .gallery-stage[data-gallery-opening-phase='gathering'] > .gallery-card,
+    .gallery-stage[data-gallery-opening-phase='gathering'] > .gallery-nav,
+    .gallery-stage[data-gallery-opening-phase='expanding'] > .gallery-card,
+    .gallery-stage[data-gallery-opening-phase='expanding'] > .gallery-nav {
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    .gallery-stage[data-gallery-opening-phase='revealing'] > .gallery-card {
+      visibility: visible;
+      transition-duration: var(--gallery-reveal-duration);
+    }
+
+    .gallery-stage[data-gallery-opening-phase='revealing'] > .gallery-nav {
+      visibility: visible;
+      opacity: 1;
+      transition: opacity var(--gallery-reveal-duration) ease;
+    }
+
+    .gallery-stage[data-gallery-opening-phase='gathering'] .gallery-opening-card {
+      top: 50%;
+      left: 50%;
+      border-color: transparent;
+      opacity: .2;
+      transform: translate(-50%, -50%) rotate(0deg) scale(.96);
+    }
+
+    .gallery-stage[data-gallery-opening-phase='gathering'] .gallery-opening-card.is-lead {
+      opacity: 1;
+    }
+
+    .gallery-stage[data-gallery-opening-phase='gathering'] .gallery-opening-button,
+    .gallery-stage[data-gallery-opening-phase='expanding'] .gallery-opening-button,
+    .gallery-stage[data-gallery-opening-phase='revealing'] .gallery-opening-button {
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, -45%) scale(.94);
+    }
+
+    .gallery-stage[data-gallery-opening-phase='expanding'] .gallery-opening-card:not(.is-lead),
+    .gallery-stage[data-gallery-opening-phase='revealing'] .gallery-opening-card:not(.is-lead) {
+      border-color: transparent;
+      opacity: 0;
+      transition-delay: 0ms;
+      transition-duration: 240ms;
+    }
+
+    .gallery-stage[data-gallery-opening-phase='expanding'] .gallery-opening-card.is-lead,
+    .gallery-stage[data-gallery-opening-phase='revealing'] .gallery-opening-card.is-lead {
+      top: 50%;
+      left: 50%;
+      width: 72%;
+      max-width: 300px;
+      border: var(--gallery-photo-border);
+      opacity: 1;
+      box-shadow: 0 18px 38px rgb(36 67 70 / 18%);
+      transform: translate(-50%, -50%) rotate(0deg) scale(1);
+      transition:
+        top var(--gallery-expand-duration) cubic-bezier(.22, 1, .36, 1),
+        left var(--gallery-expand-duration) cubic-bezier(.22, 1, .36, 1),
+        width var(--gallery-expand-duration) cubic-bezier(.22, 1, .36, 1),
+        max-width var(--gallery-expand-duration) cubic-bezier(.22, 1, .36, 1),
+        border-color var(--gallery-expand-duration) ease,
+        opacity var(--gallery-expand-duration) ease,
+        box-shadow var(--gallery-expand-duration) ease,
+        transform var(--gallery-expand-duration) cubic-bezier(.22, 1, .36, 1);
+      transition-delay: 0ms;
+    }
+
+    .gallery-stage[data-gallery-opening-phase='revealing'] .gallery-opening {
+      opacity: 0;
+      pointer-events: none;
     }
 
     .gallery-empty {
@@ -1089,6 +1240,14 @@
       font-weight: 400;
     }
 
+    .gallery-nav:focus-visible,
+    .lightbox-control:focus-visible,
+    #lightbox-dialog .dialog-close:focus-visible {
+      outline: none;
+      color: color-mix(in srgb, var(--gallery-control-color) 82%, #303a3c);
+      text-shadow: 0 1px 5px rgb(57 67 69 / 24%);
+    }
+
     .dialog-close {
       position: absolute;
       top: 10px;
@@ -1101,17 +1260,33 @@
     }
 
     #lightbox-dialog {
-      width: 100%;
+      width: 100vw;
       max-width: none;
       height: 100dvh;
       max-height: none;
       margin: 0;
-      color: white;
-      background: rgb(14 22 23 / 96%);
+      color: var(--gallery-control-color);
+      background: white;
+      box-shadow: none;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--gallery-lightbox-fade-duration) ease;
+    }
+
+    #lightbox-dialog.is-lightbox-visible {
+      opacity: 1;
+      pointer-events: auto;
     }
 
     #lightbox-dialog::backdrop {
-      background: rgb(14 22 23 / 96%);
+      background: white;
+      backdrop-filter: none;
+      opacity: 0;
+      transition: opacity var(--gallery-lightbox-fade-duration) ease;
+    }
+
+    #lightbox-dialog.is-lightbox-visible::backdrop {
+      opacity: 1;
     }
 
     #lightbox-dialog .dialog-inner {
@@ -1119,15 +1294,16 @@
       display: grid;
       width: 100%;
       height: 100%;
-      padding: 24px;
+      padding: 0;
       place-items: center;
+      background: white;
     }
 
     #lightbox-dialog .dialog-close {
       z-index: 10;
       top: max(12px, env(safe-area-inset-top));
       right: max(12px, env(safe-area-inset-right));
-      color: rgb(255 255 255 / 92%);
+      color: var(--gallery-control-color);
       font-family: var(--sans);
       font-size: 2rem;
       font-weight: 200;
@@ -1139,21 +1315,23 @@
       width: 100%;
       height: 100%;
       place-items: center;
+      background: white;
       touch-action: pan-y;
     }
 
     .lightbox-picture {
       position: relative;
-      width: min(100%, 720px);
-      height: min(82dvh, 900px);
+      width: 100%;
+      height: 100dvh;
     }
 
     .lightbox-picture .media-frame {
       width: 100%;
       height: 100%;
       min-height: 0;
-      border-radius: 2px;
-      background: #0e1617;
+      border: 0;
+      border-radius: 0;
+      background: white;
     }
 
     .lightbox-picture .media-frame img {
@@ -1170,9 +1348,8 @@
     .lightbox-control {
       position: absolute;
       top: 50%;
-      color: white;
-      background: rgb(255 255 255 / 20%);
-      border-color: rgb(255 255 255 / 30%);
+      color: var(--gallery-control-color);
+      background: transparent;
       pointer-events: auto;
       transform: translateY(-50%);
       transition: opacity 520ms ease;
@@ -1187,6 +1364,12 @@
     }
 
     .lightbox-counter {
+      top: calc(max(12px, env(safe-area-inset-top)) + 22px);
+      right: auto;
+      left: 50%;
+      color: var(--gallery-control-color);
+      background: rgb(255 255 255 / 38%);
+      transform: translate(-50%, -50%);
       transition: opacity 520ms ease;
     }
 
@@ -1200,9 +1383,15 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
+      .gallery-opening,
+      .gallery-opening-card,
+      .gallery-opening-button,
       .gallery-card,
+      .gallery-nav,
       .lightbox-control,
-      .lightbox-counter {
+      .lightbox-counter,
+      #lightbox-dialog,
+      #lightbox-dialog::backdrop {
         transition: none;
       }
     }
@@ -1390,7 +1579,20 @@
         return Array.isArray(value) ? value.slice() : String(value || '').split(/\r?\n/);
       }
 
-      return { calendarCells, countdownParts, telHref, toLines };
+      function galleryOpeningDelays(count, maxDelayMs) {
+        const length = Math.max(0, Math.floor(Number(count) || 0));
+        const maximum = Math.max(0, Number(maxDelayMs) || 0);
+        return Array.from({ length }, (_, index) => Math.round(((index * 47) % 101) / 100 * maximum));
+      }
+
+      function cssTimeMs(value) {
+        const match = String(value || '').trim().match(/^(\d*\.?\d+)(ms|s)$/i);
+        if (!match) return 0;
+        const milliseconds = Number(match[1]) * (match[2].toLowerCase() === 's' ? 1000 : 1);
+        return Number.isFinite(milliseconds) ? Math.max(0, milliseconds) : 0;
+      }
+
+      return { calendarCells, countdownParts, cssTimeMs, galleryOpeningDelays, telHref, toLines };
     })());
   </script>
   <script id="wedding-app">
@@ -1421,6 +1623,7 @@
       let galleryStage = null;
       let galleryCounterTimer = 0;
       let lightboxControlsTimer = 0;
+      let lightboxTransitionTimer = 0;
       let toastTimer = 0;
       let revealMotionInitialized = false;
 
@@ -1639,6 +1842,115 @@
         return section;
       }
 
+      function setupGalleryOpening(stage, items) {
+        if (!stage || !items.length || stage.dataset.galleryOpeningReady !== undefined) return;
+        stage.dataset.galleryOpeningReady = '';
+        stage.dataset.galleryOpeningPhase = 'scattered';
+
+        const cssTimeToMs = (name, fallback) => {
+          const value = getComputedStyle(stage).getPropertyValue(name).trim();
+          const amount = Number.parseFloat(value);
+          if (!Number.isFinite(amount)) return fallback;
+          return Math.max(0, value.endsWith('ms') ? amount : amount * 1000);
+        };
+        const gatherMs = cssTimeToMs('--gallery-gather-duration', 1700);
+        const staggerMaxMs = cssTimeToMs('--gallery-gather-stagger-max', 520);
+        const expandMs = cssTimeToMs('--gallery-expand-duration', 1000);
+        const revealMs = cssTimeToMs('--gallery-reveal-duration', 1200);
+        const delays = WeddingUtils.galleryOpeningDelays(items.length, staggerMaxMs);
+        const scatter = [
+          [-27, -17, -14, .91], [-12, 18, 9, .96], [25, -13, -7, .93], [8, 21, 15, .9],
+          [-24, 5, -10, .95], [29, 13, 6, .89], [-4, -21, 13, .92], [18, -1, -3, .96],
+          [-18, 20, 9, .9], [3, -10, -16, .94], [23, 18, 3, .91], [-30, -19, -8, .95],
+        ];
+        const density = Math.max(.58, 1 - Math.max(0, items.length - 8) * .024);
+        const opening = element('div', 'gallery-opening');
+        opening.dataset.galleryOpening = '';
+        opening.setAttribute('role', 'group');
+        opening.setAttribute('aria-label', '사진첩 미리보기');
+
+        items.forEach((item, index) => {
+          const card = element('div', 'gallery-opening-card');
+          const [x, y, rotation, scale] = scatter[index % scatter.length];
+          const layer = Math.floor(index / scatter.length) % 5;
+          card.classList.toggle('is-lead', index === 0);
+          card.setAttribute('aria-hidden', 'true');
+          card.style.zIndex = index === 0 ? items.length + 1 : index + 1;
+          card.style.setProperty('--gallery-opening-x', `${(x * density) + layer * 1.4}%`);
+          card.style.setProperty('--gallery-opening-y', `${(y * density) - layer * 1.1}%`);
+          card.style.setProperty('--gallery-opening-rotation', `${rotation + layer * 1.2}deg`);
+          card.style.setProperty('--gallery-opening-scale', String(scale));
+          card.style.setProperty('--gallery-opening-delay', `${delays[index]}ms`);
+          if (String(item.src || '').trim()) {
+            const image = element('img');
+            image.alt = '';
+            image.loading = index === 0 ? 'eager' : 'lazy';
+            image.decoding = 'async';
+            image.src = item.src;
+            card.append(image);
+          }
+          opening.append(card);
+        });
+
+        const openButton = element('button', 'gallery-opening-button', '사진첩 보기');
+        openButton.type = 'button';
+        opening.append(openButton);
+        stage.append(opening);
+
+        const galleryCards = [...stage.querySelectorAll('[data-gallery-card]')];
+        const galleryNav = [...stage.querySelectorAll('[data-gallery-direction]')];
+        galleryCards.forEach(card => {
+          card.tabIndex = -1;
+          card.setAttribute('aria-hidden', 'true');
+        });
+        galleryNav.forEach(button => { button.tabIndex = -1; });
+
+        const timers = [];
+        const clearTimers = () => {
+          timers.forEach(timer => window.clearTimeout(timer));
+          timers.length = 0;
+        };
+        const schedule = (callback, delay) => {
+          timers.push(window.setTimeout(callback, delay));
+        };
+        const isCurrentStage = () => stage === galleryStage && stage.isConnected;
+        const finishOpening = () => {
+          clearTimers();
+          if (!isCurrentStage()) return;
+          const restoreFocus = document.activeElement === openButton;
+          stage.dataset.galleryOpeningPhase = 'opened';
+          updateGalleryCards();
+          galleryNav.forEach(button => { button.removeAttribute('tabindex'); });
+          opening.remove();
+          setupGalleryCounter(stage);
+          showGalleryCounter();
+          if (restoreFocus) {
+            const current = stage.querySelector("[data-gallery-position='current']");
+            if (current) current.focus({ preventScroll: true });
+          }
+        };
+
+        openButton.addEventListener('click', () => {
+          openButton.disabled = true;
+          const reduceMotion = typeof window.matchMedia === 'function'
+            && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          if (reduceMotion) {
+            finishOpening();
+            return;
+          }
+          stage.dataset.galleryOpeningPhase = 'gathering';
+          schedule(() => {
+            if (!isCurrentStage()) return clearTimers();
+            stage.dataset.galleryOpeningPhase = 'expanding';
+            schedule(() => {
+              if (!isCurrentStage()) return clearTimers();
+              stage.dataset.galleryOpeningPhase = 'revealing';
+              schedule(finishOpening, revealMs);
+            }, expandMs);
+          }, gatherMs + staggerMaxMs);
+        });
+      }
+
       function updateGalleryCards() {
         if (!galleryStage) return;
         const items = WEDDING_CONFIG.media.gallery;
@@ -1698,6 +2010,7 @@
           const deltaY = touch.clientY - startY;
           startX = null;
           startY = null;
+          if (surface.dataset.galleryOpeningPhase && surface.dataset.galleryOpeningPhase !== 'opened') return;
           if (Math.abs(deltaX) < 44 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
           updateGallery(galleryIndex + (deltaX < 0 ? 1 : -1));
           if (surface.dataset.lightboxContent !== undefined) showLightboxControls();
@@ -1744,8 +2057,8 @@
         carousel.append(stage);
         body.append(carousel);
         updateGalleryCards();
+        setupGalleryOpening(stage, items);
         bindGallerySwipe(stage);
-        setupGalleryCounter(stage);
         return section;
       }
 
@@ -1946,6 +2259,11 @@
       function openDialog(dialog, trigger) {
         if (!dialog) return;
         dialogTriggers.set(dialog, trigger);
+        if (dialog.id === 'lightbox-dialog') {
+          window.clearTimeout(lightboxTransitionTimer);
+          lightboxTransitionTimer = 0;
+          dialog.classList.remove('is-lightbox-visible');
+        }
         if (!dialog.open) {
           if (typeof dialog.showModal === 'function') {
             dialog.showModal();
@@ -1954,9 +2272,29 @@
           }
         }
         window.requestAnimationFrame(() => {
+          if (dialog.id === 'lightbox-dialog') dialog.classList.add('is-lightbox-visible');
           const closeButton = dialog.querySelector('.dialog-close');
           if (closeButton) closeButton.focus();
         });
+      }
+
+      function lightboxFadeDuration() {
+        const reduceMotion = typeof window.matchMedia === 'function'
+          && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduceMotion) return 0;
+        const rawDuration = getComputedStyle(document.documentElement)
+          .getPropertyValue('--gallery-lightbox-fade-duration');
+        return WeddingUtils.cssTimeMs(rawDuration);
+      }
+
+      function finishDialogClose(dialog) {
+        if (dialog.open && typeof dialog.close === 'function') {
+          dialog.close();
+        } else {
+          dialog.removeAttribute('open');
+        }
+        dialog.classList.remove('is-lightbox-visible');
+        restoreDialogFocus(dialog);
       }
 
       function closeDialog(dialog) {
@@ -1965,13 +2303,18 @@
           window.clearTimeout(lightboxControlsTimer);
           lightboxControlsTimer = 0;
           dialog.classList.remove('is-controls-hidden');
+          window.clearTimeout(lightboxTransitionTimer);
+          dialog.classList.remove('is-lightbox-visible');
+          const duration = lightboxFadeDuration();
+          if (dialog.open && duration > 0) {
+            lightboxTransitionTimer = window.setTimeout(() => {
+              lightboxTransitionTimer = 0;
+              finishDialogClose(dialog);
+            }, duration);
+            return;
+          }
         }
-        if (dialog.open && typeof dialog.close === 'function') {
-          dialog.close();
-        } else {
-          dialog.removeAttribute('open');
-        }
-        restoreDialogFocus(dialog);
+        finishDialogClose(dialog);
       }
 
       function setupDialog(dialog) {
@@ -1987,7 +2330,14 @@
           if (dialog.id === 'lightbox-dialog') showLightboxControls();
           else closeDialog(dialog);
         });
-        dialog.addEventListener('close', () => restoreDialogFocus(dialog));
+        dialog.addEventListener('close', () => {
+          if (dialog.id === 'lightbox-dialog') {
+            window.clearTimeout(lightboxTransitionTimer);
+            lightboxTransitionTimer = 0;
+            dialog.classList.remove('is-lightbox-visible');
+          }
+          restoreDialogFocus(dialog);
+        });
       }
 
       function renderContactDialog(side) {
