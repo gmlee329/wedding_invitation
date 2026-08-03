@@ -31,9 +31,10 @@
         hero: './assets/images/hero.jpg',
         // 약도 이미지: assets/images 폴더에 map.jpg 이름으로 넣으세요.
         map: './assets/images/map.jpg',
-        // 갤러리 이미지: gallery-01.jpg부터 gallery-08.jpg까지 두 자리 번호로 넣으세요.
+        // 갤러리 이미지: gallery-01.jpg부터 두 자리 번호로 순서대로 넣으세요.
+        // length 숫자가 갤러리 이미지 개수입니다. 예: 12장이라면 length: 12
         // 파일명이나 확장자를 바꾸면 아래 src 경로도 실제 파일에 맞게 수정하세요. 예: hero.png → './assets/images/hero.png'
-        gallery: Array.from({ length: 8 }, (_, index) => ({
+        gallery: Array.from({ length: 4 }, (_, index) => ({
           src: `./assets/images/gallery-${String(index + 1).padStart(2, '0')}.jpg`,
           alt: `웨딩 사진 ${index + 1}`,
         })),
@@ -50,7 +51,7 @@
     :root {
       --page-width: 460px;
       --paper: #f2f8ff; /* 전체 배경색: 이 값만 변경하세요 */
-      --reveal-duration: 2400ms; /* 글씨 등장 속도: 숫자가 클수록 천천히 나타납니다 */
+      --reveal-duration: 1800ms; /* 글씨 등장 속도: 숫자가 클수록 천천히 나타납니다 */
       --reveal-distance: 32px; /* 글씨 상승 거리: 숫자가 작을수록 차분하게 움직입니다 */
       --reveal-body-delay: 300ms; /* 본문 시작 간격: 숫자가 클수록 늦게 시작합니다 */
       --ink: #244346;
@@ -330,17 +331,9 @@
       inset: 0;
       background: var(--ink);
       content: '';
+      transform: scaleX(var(--intro-progress, 0));
       transform-origin: left;
-      animation: intro-progress 8s linear infinite paused;
-    }
-
-    .intro.is-video-playing .intro-progress::after {
-      animation-play-state: running;
-    }
-
-    @keyframes intro-progress {
-      from { transform: scaleX(0); }
-      to { transform: scaleX(1); }
+      transition: transform 120ms linear;
     }
 
     .intro-control {
@@ -474,7 +467,7 @@
       max-width: 100%;
       margin: 0;
       font-family: 'Courgette', cursive;
-      font-size: clamp(1.8rem, 10.5vw, 2.9rem);
+      font-size: calc((min(100vw, var(--page-width)) - 40px) * .12);
       letter-spacing: 0;
       line-height: 0.95;
       white-space: nowrap;
@@ -770,38 +763,132 @@
       letter-spacing: 0.08em;
     }
 
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-      gap: 8px;
+    .gallery-carousel {
+      position: relative;
     }
 
-    .gallery-button {
+    .gallery-stage {
       position: relative;
-      min-width: 0;
+      height: clamp(350px, 112vw, 480px);
+      overflow: hidden;
+      touch-action: pan-y;
+    }
+
+    .gallery-card {
+      position: absolute;
+      z-index: 0;
+      top: 50%;
+      left: 50%;
+      width: 72%;
+      max-width: 300px;
+      min-height: 0;
       padding: 0;
       border: 0;
-      grid-column: span 7;
+      opacity: 0;
       background: transparent;
+      box-shadow: 0 18px 38px rgb(36 67 70 / 18%);
       cursor: pointer;
+      filter: blur(2px) saturate(.78);
+      pointer-events: none;
+      transform: translate(-50%, -50%) scale(.84);
+      transition:
+        left 680ms cubic-bezier(.22, 1, .36, 1),
+        width 680ms cubic-bezier(.22, 1, .36, 1),
+        opacity 520ms ease,
+        filter 520ms ease,
+        transform 680ms cubic-bezier(.22, 1, .36, 1);
     }
 
-    .gallery-button:nth-child(4n + 2),
-    .gallery-button:nth-child(4n + 3) {
-      grid-column: span 5;
+    .gallery-card[data-gallery-position='current'] {
+      z-index: 3;
+      opacity: 1;
+      filter: none;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) scale(1);
     }
 
-    .gallery-button:nth-child(4n + 4) {
-      grid-column: 5 / span 8;
+    .gallery-card[data-gallery-position='previous'],
+    .gallery-card[data-gallery-position='next'] {
+      z-index: 1;
+      width: 55%;
+      opacity: .58;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) scale(.9);
     }
 
-    .gallery-button .media-frame {
+    .gallery-card[data-gallery-position='previous'] {
+      left: 23%;
+    }
+
+    .gallery-card[data-gallery-position='next'] {
+      left: 77%;
+    }
+
+    .gallery-card .media-frame {
       width: 100%;
-      aspect-ratio: 4 / 5;
+      margin: 0;
+      overflow: hidden;
+      aspect-ratio: 2 / 3;
+      border-radius: 2px;
     }
 
-    .gallery-button:nth-child(3n + 2) .media-frame {
-      aspect-ratio: 3 / 4.45;
+    .gallery-counter,
+    .lightbox-counter {
+      position: absolute;
+      z-index: 5;
+      top: 12px;
+      right: 12px;
+      padding: 5px 8px;
+      color: rgb(255 255 255 / 92%);
+      background: rgb(26 43 44 / 42%);
+      font-size: .62rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      line-height: 1.4;
+      backdrop-filter: blur(5px);
+    }
+
+    .gallery-card:not([data-gallery-position='current']) .gallery-counter {
+      opacity: 0;
+    }
+
+    .gallery-nav,
+    .lightbox-control {
+      display: grid;
+      width: 44px;
+      height: 44px;
+      padding: 0 0 3px;
+      border: 1px solid rgb(255 255 255 / 46%);
+      border-radius: 50%;
+      place-items: center;
+      color: var(--ink);
+      background: rgb(255 255 255 / 44%);
+      box-shadow: 0 8px 22px rgb(36 67 70 / 15%);
+      cursor: pointer;
+      font-family: var(--serif);
+      font-size: 1.75rem;
+      line-height: 1;
+      backdrop-filter: blur(7px);
+    }
+
+    .gallery-nav {
+      position: absolute;
+      z-index: 5;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .gallery-nav[data-gallery-direction='-1'] { left: 0; }
+    .gallery-nav[data-gallery-direction='1'] { right: 0; }
+
+    .gallery-stage.is-single .gallery-nav {
+      display: none;
+    }
+
+    .gallery-empty {
+      margin: 0;
+      color: var(--muted);
+      text-align: center;
     }
 
     .location-address {
@@ -1000,26 +1087,111 @@
       cursor: pointer;
     }
 
-    .lightbox-media {
-      min-height: min(68dvh, 620px);
+    #lightbox-dialog {
+      width: 100%;
+      max-width: none;
+      height: 100dvh;
+      max-height: none;
+      margin: 0;
+      color: white;
+      background: rgb(14 22 23 / 96%);
     }
 
-    .lightbox-media .media-frame {
+    #lightbox-dialog::backdrop {
+      background: rgb(14 22 23 / 96%);
+    }
+
+    #lightbox-dialog .dialog-inner {
+      position: relative;
+      display: grid;
       width: 100%;
-      min-height: min(68dvh, 620px);
+      height: 100%;
+      padding: 24px;
+      place-items: center;
+    }
+
+    #lightbox-dialog .dialog-close {
+      z-index: 10;
+      top: max(12px, env(safe-area-inset-top));
+      right: max(12px, env(safe-area-inset-right));
+      color: rgb(255 255 255 / 92%);
+      font-family: var(--sans);
+      font-size: 2rem;
+      font-weight: 200;
+      line-height: 1;
+    }
+
+    .lightbox-media {
+      display: grid;
+      width: 100%;
+      height: 100%;
+      place-items: center;
+      touch-action: pan-y;
+    }
+
+    .lightbox-picture {
+      position: relative;
+      width: min(100%, 720px);
+      height: min(82dvh, 900px);
+    }
+
+    .lightbox-picture .media-frame {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      border-radius: 2px;
+      background: #0e1617;
+    }
+
+    .lightbox-picture .media-frame img {
+      object-fit: contain;
     }
 
     .lightbox-controls {
-      display: grid;
-      padding: 12px 28px 24px;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
+      position: absolute;
+      z-index: 8;
+      inset: 0;
+      pointer-events: none;
     }
 
     .lightbox-control {
-      border: 1px solid var(--line);
-      background: transparent;
-      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      color: white;
+      background: rgb(255 255 255 / 20%);
+      border-color: rgb(255 255 255 / 30%);
+      pointer-events: auto;
+      transform: translateY(-50%);
+      transition: opacity 520ms ease;
+    }
+
+    .lightbox-control[data-gallery-direction='-1'] {
+      left: max(12px, env(safe-area-inset-left));
+    }
+
+    .lightbox-control[data-gallery-direction='1'] {
+      right: max(12px, env(safe-area-inset-right));
+    }
+
+    .lightbox-counter {
+      transition: opacity 520ms ease;
+    }
+
+    #lightbox-dialog.is-controls-hidden .lightbox-auto-control {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #lightbox-dialog.is-single .lightbox-controls {
+      display: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .gallery-card,
+      .lightbox-control,
+      .lightbox-counter {
+        transition: none;
+      }
     }
 
     .contact-list {
@@ -1150,7 +1322,7 @@
   <dialog id="lightbox-dialog" aria-label="웨딩 사진 크게 보기">
     <div class="dialog-inner">
       <div class="lightbox-media" data-lightbox-content></div>
-      <button class="dialog-close" type="button" aria-label="사진 창 닫기">닫기</button>
+      <button class="dialog-close" type="button" aria-label="사진 창 닫기">×</button>
     </div>
   </dialog>
   <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
@@ -1232,6 +1404,8 @@
       let introPlaybackTimer = 0;
       let countdownTimer = 0;
       let galleryIndex = 0;
+      let galleryStage = null;
+      let lightboxControlsTimer = 0;
       let toastTimer = 0;
       let revealMotionInitialized = false;
 
@@ -1450,18 +1624,85 @@
         return section;
       }
 
+      function updateGalleryCards() {
+        if (!galleryStage) return;
+        const items = WEDDING_CONFIG.media.gallery;
+        const length = items.length;
+        galleryStage.classList[length < 2 ? 'add' : 'remove']('is-single');
+        galleryStage.querySelectorAll('[data-gallery-card]').forEach((card, index) => {
+          let position = 'hidden';
+          if (index === galleryIndex) position = 'current';
+          else if (length > 1 && index === (galleryIndex + 1) % length) position = 'next';
+          else if (length > 2 && index === (galleryIndex - 1 + length) % length) position = 'previous';
+          card.dataset.galleryPosition = position;
+          card.tabIndex = position === 'hidden' ? -1 : 0;
+          card.setAttribute('aria-hidden', position === 'hidden' ? 'true' : 'false');
+        });
+      }
+
+      function bindGallerySwipe(surface) {
+        if (!surface || surface.dataset.gallerySwipeReady !== undefined) return;
+        surface.dataset.gallerySwipeReady = '';
+        let startX = null;
+        let startY = null;
+        surface.addEventListener('touchstart', event => {
+          const touch = event.touches && event.touches[0];
+          if (!touch) return;
+          startX = touch.clientX;
+          startY = touch.clientY;
+        }, { passive: true });
+        surface.addEventListener('touchend', event => {
+          const touch = event.changedTouches && event.changedTouches[0];
+          if (!touch || startX === null || startY === null) return;
+          const deltaX = touch.clientX - startX;
+          const deltaY = touch.clientY - startY;
+          startX = null;
+          startY = null;
+          if (Math.abs(deltaX) < 44 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+          updateGallery(galleryIndex + (deltaX < 0 ? 1 : -1));
+          if (surface.dataset.lightboxContent !== undefined) showLightboxControls();
+        }, { passive: true });
+      }
+
       function renderGallery() {
         const section = sectionShell('gallery', 'Gallery', '빛나는 순간들');
-        const grid = element('div', 'gallery-grid');
-        WEDDING_CONFIG.media.gallery.forEach((item, index) => {
-          const button = element('button', 'gallery-button');
+        const body = sectionBody(section);
+        const items = WEDDING_CONFIG.media.gallery;
+        if (!items.length) {
+          galleryStage = null;
+          body.append(element('p', 'gallery-empty', '사진을 준비하고 있습니다.'));
+          return section;
+        }
+
+        const carousel = element('div', 'gallery-carousel');
+        const stage = element('div', 'gallery-stage');
+        galleryStage = stage;
+        galleryIndex = 0;
+        items.forEach((item, index) => {
+          const button = element('button', 'gallery-card');
           button.type = 'button';
+          button.dataset.galleryCard = '';
           button.dataset.galleryIndex = index;
           button.setAttribute('aria-label', `${item.alt || `웨딩 사진 ${index + 1}`} 크게 보기`);
-          button.append(mediaFrame(item.src, item.alt, `Photo ${String(index + 1).padStart(2, '0')}`));
-          grid.append(button);
+          button.append(
+            mediaFrame(item.src, item.alt, `Photo ${String(index + 1).padStart(2, '0')}`),
+            element('span', 'gallery-counter', `${String(index + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`),
+          );
+          stage.append(button);
         });
-        sectionBody(section).append(grid);
+        const previous = element('button', 'gallery-nav', '‹');
+        previous.type = 'button';
+        previous.dataset.galleryDirection = '-1';
+        previous.setAttribute('aria-label', '이전 사진');
+        const next = element('button', 'gallery-nav', '›');
+        next.type = 'button';
+        next.dataset.galleryDirection = '1';
+        next.setAttribute('aria-label', '다음 사진');
+        stage.append(previous, next);
+        carousel.append(stage);
+        body.append(carousel);
+        updateGalleryCards();
+        bindGallerySwipe(stage);
         return section;
       }
 
@@ -1677,6 +1918,11 @@
 
       function closeDialog(dialog) {
         if (!dialog) return;
+        if (dialog.id === 'lightbox-dialog') {
+          window.clearTimeout(lightboxControlsTimer);
+          lightboxControlsTimer = 0;
+          dialog.classList.remove('is-controls-hidden');
+        }
         if (dialog.open && typeof dialog.close === 'function') {
           dialog.close();
         } else {
@@ -1694,7 +1940,9 @@
           closeDialog(dialog);
         });
         dialog.addEventListener('click', event => {
-          if (event.target === dialog) closeDialog(dialog);
+          if (event.target !== dialog) return;
+          if (dialog.id === 'lightbox-dialog') showLightboxControls();
+          else closeDialog(dialog);
         });
         dialog.addEventListener('close', () => restoreDialogFocus(dialog));
       }
@@ -1724,28 +1972,58 @@
         const items = WEDDING_CONFIG.media.gallery;
         const dialog = document.getElementById('lightbox-dialog');
         const content = dialog && dialog.querySelector('[data-lightbox-content]');
-        if (!dialog || !content || !items.length) return;
+        if (!items.length) return;
         galleryIndex = ((Number(nextIndex) % items.length) + items.length) % items.length;
+        updateGalleryCards();
+        if (!dialog || !content) return;
         const item = items[galleryIndex];
         const alt = item.alt || `웨딩 사진 ${galleryIndex + 1}`;
-        content.replaceChildren(mediaFrame(item.src, alt, `Photo ${String(galleryIndex + 1).padStart(2, '0')}`));
+        const picture = element('div', 'lightbox-picture');
+        picture.append(
+          mediaFrame(item.src, alt, `Photo ${String(galleryIndex + 1).padStart(2, '0')}`),
+          element('span', 'lightbox-counter lightbox-auto-control', `${String(galleryIndex + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`),
+        );
+        content.replaceChildren(picture);
+        dialog.classList[items.length < 2 ? 'add' : 'remove']('is-single');
         dialog.setAttribute('aria-label', `${alt} 크게 보기`);
+      }
+
+      function showLightboxControls() {
+        const dialog = document.getElementById('lightbox-dialog');
+        if (!dialog) return;
+        window.clearTimeout(lightboxControlsTimer);
+        dialog.classList.remove('is-controls-hidden');
+        lightboxControlsTimer = window.setTimeout(() => {
+          dialog.classList.add('is-controls-hidden');
+          lightboxControlsTimer = 0;
+        }, 2000);
       }
 
       function setupLightbox() {
         const dialog = document.getElementById('lightbox-dialog');
         const inner = dialog && dialog.querySelector('.dialog-inner');
+        const content = dialog && dialog.querySelector('[data-lightbox-content]');
         const closeButton = dialog && dialog.querySelector('.dialog-close');
-        if (!dialog || !inner || !closeButton) return;
+        if (!dialog || !inner || !content || !closeButton || dialog.dataset.lightboxReady !== undefined) return;
+        dialog.dataset.lightboxReady = '';
         const controls = element('div', 'lightbox-controls');
-        const previous = element('button', 'lightbox-control', '이전 사진');
+        controls.dataset.lightboxControls = '';
+        const previous = element('button', 'lightbox-control lightbox-auto-control', '‹');
         previous.type = 'button';
         previous.dataset.galleryDirection = '-1';
-        const next = element('button', 'lightbox-control', '다음 사진');
+        previous.setAttribute('aria-label', '이전 사진');
+        const next = element('button', 'lightbox-control lightbox-auto-control', '›');
         next.type = 'button';
         next.dataset.galleryDirection = '1';
+        next.setAttribute('aria-label', '다음 사진');
         controls.append(previous, next);
         inner.insertBefore(controls, closeButton);
+        bindGallerySwipe(content);
+        dialog.addEventListener('click', event => {
+          if (event.target.closest && event.target.closest('.dialog-close')) return;
+          showLightboxControls();
+        });
+        updateGallery(galleryIndex);
       }
 
       async function shareInvitation() {
@@ -1784,13 +2062,21 @@
           }
 
           if (trigger.dataset.galleryIndex !== undefined) {
-            updateGallery(Number(trigger.dataset.galleryIndex));
-            openDialog(document.getElementById('lightbox-dialog'), trigger);
+            const index = Number(trigger.dataset.galleryIndex);
+            if (trigger.dataset.galleryPosition === 'current') {
+              updateGallery(index);
+              openDialog(document.getElementById('lightbox-dialog'), trigger);
+              showLightboxControls();
+            } else {
+              updateGallery(index);
+            }
             return;
           }
 
           if (trigger.dataset.galleryDirection) {
             updateGallery(galleryIndex + Number(trigger.dataset.galleryDirection));
+            const lightbox = document.getElementById('lightbox-dialog');
+            if (lightbox && lightbox.open) showLightboxControls();
             return;
           }
 
@@ -2002,8 +2288,22 @@
           }
         };
 
+        const syncIntroProgress = () => {
+          const duration = Number(video.duration);
+          const currentTime = Number(video.currentTime);
+          const progress = Number.isFinite(duration) && duration > 0 && Number.isFinite(currentTime)
+            ? Math.min(1, Math.max(0, currentTime / duration))
+            : 0;
+          intro.style.setProperty('--intro-progress', String(progress));
+        };
+
         play.addEventListener('click', () => attemptIntroPlayback({ manual: true }));
-        video.addEventListener('ended', () => finishIntro('ended'));
+        video.addEventListener('timeupdate', syncIntroProgress);
+        video.addEventListener('durationchange', syncIntroProgress);
+        video.addEventListener('ended', () => {
+          intro.style.setProperty('--intro-progress', '1');
+          finishIntro('ended');
+        });
         video.addEventListener('error', handleIntroMediaError);
         document.addEventListener('keydown', handleIntroKeydown);
         skip.focus({ preventScroll: true });
@@ -2020,20 +2320,22 @@
           && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const effectiveFadeMs = reduceMotion ? 0 : fadeMs;
         intro.style.setProperty('--intro-message-fade-duration', `${effectiveFadeMs}ms`);
+        intro.style.setProperty('--intro-progress', '0');
 
         const completeMessageFade = () => {
           introPlaybackTimer = 0;
           if (introFinished || document.getElementById('intro') !== intro) return;
           intro.classList.add('is-message-hidden');
           introHeading.setAttribute('aria-hidden', 'true');
+          video.currentTime = 0;
+          syncIntroProgress();
+          attemptIntroPlayback();
         };
 
         const fadeMessage = () => {
           introMessageTimer = 0;
           if (introFinished || document.getElementById('intro') !== intro) return;
           intro.classList.add('is-message-fading');
-          video.currentTime = 0;
-          attemptIntroPlayback();
           if (effectiveFadeMs === 0) {
             completeMessageFade();
             return;
