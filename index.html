@@ -333,7 +333,6 @@
       content: '';
       transform: scaleX(var(--intro-progress, 0));
       transform-origin: left;
-      transition: transform 120ms linear;
     }
 
     .intro-control {
@@ -807,6 +806,10 @@
       transform: translate(-50%, -50%) scale(1);
     }
 
+    .gallery-card[data-gallery-position='current'] .media-frame {
+      border: 1px solid rgb(255 255 255 / 70%);
+    }
+
     .gallery-card[data-gallery-position='previous'],
     .gallery-card[data-gallery-position='next'] {
       z-index: 1;
@@ -840,7 +843,7 @@
       right: 12px;
       padding: 5px 8px;
       color: rgb(255 255 255 / 92%);
-      background: rgb(26 43 44 / 42%);
+      background: rgb(26 43 44 / 24%);
       font-size: .62rem;
       font-weight: 600;
       letter-spacing: .08em;
@@ -848,20 +851,30 @@
       backdrop-filter: blur(5px);
     }
 
+    .gallery-counter {
+      transition: opacity 520ms ease;
+    }
+
     .gallery-card:not([data-gallery-position='current']) .gallery-counter {
+      opacity: 0;
+    }
+
+    .gallery-stage.is-counter-hidden .gallery-counter {
       opacity: 0;
     }
 
     .gallery-nav,
     .lightbox-control {
       display: grid;
-      width: 44px;
-      height: 44px;
+      width: 38px;
+      height: 38px;
+      min-width: 38px;
+      min-height: 38px;
       padding: 0 0 3px;
       border: 1px solid rgb(255 255 255 / 46%);
       border-radius: 50%;
       place-items: center;
-      color: var(--ink);
+      color: white;
       background: rgb(255 255 255 / 44%);
       box-shadow: 0 8px 22px rgb(36 67 70 / 15%);
       cursor: pointer;
@@ -1402,9 +1415,11 @@
       let introRemovalTimer = 0;
       let introMessageTimer = 0;
       let introPlaybackTimer = 0;
+      let introProgressFrame = 0;
       let countdownTimer = 0;
       let galleryIndex = 0;
       let galleryStage = null;
+      let galleryCounterTimer = 0;
       let lightboxControlsTimer = 0;
       let toastTimer = 0;
       let revealMotionInitialized = false;
@@ -1640,6 +1655,31 @@
         });
       }
 
+      function showGalleryCounter() {
+        if (!galleryStage) return;
+        window.clearTimeout(galleryCounterTimer);
+        galleryStage.classList.remove('is-counter-hidden');
+        const stage = galleryStage;
+        galleryCounterTimer = window.setTimeout(() => {
+          if (stage === galleryStage) stage.classList.add('is-counter-hidden');
+          galleryCounterTimer = 0;
+        }, 2000);
+      }
+
+      function setupGalleryCounter(stage) {
+        stage.addEventListener('pointerdown', showGalleryCounter);
+        if (typeof window.IntersectionObserver !== 'function') {
+          showGalleryCounter();
+          return;
+        }
+        const observer = new window.IntersectionObserver(entries => {
+          if (!entries.some(entry => entry.isIntersecting)) return;
+          showGalleryCounter();
+          observer.unobserve(stage);
+        }, { threshold: 0.35 });
+        observer.observe(stage);
+      }
+
       function bindGallerySwipe(surface) {
         if (!surface || surface.dataset.gallerySwipeReady !== undefined) return;
         surface.dataset.gallerySwipeReady = '';
@@ -1669,6 +1709,8 @@
         const body = sectionBody(section);
         const items = WEDDING_CONFIG.media.gallery;
         if (!items.length) {
+          window.clearTimeout(galleryCounterTimer);
+          galleryCounterTimer = 0;
           galleryStage = null;
           body.append(element('p', 'gallery-empty', '사진을 준비하고 있습니다.'));
           return section;
@@ -1703,6 +1745,7 @@
         body.append(carousel);
         updateGalleryCards();
         bindGallerySwipe(stage);
+        setupGalleryCounter(stage);
         return section;
       }
 
@@ -1975,6 +2018,7 @@
         if (!items.length) return;
         galleryIndex = ((Number(nextIndex) % items.length) + items.length) % items.length;
         updateGalleryCards();
+        showGalleryCounter();
         if (!dialog || !content) return;
         const item = items[galleryIndex];
         const alt = item.alt || `웨딩 사진 ${galleryIndex + 1}`;
@@ -2126,6 +2170,11 @@
         introPlaybackTimer = 0;
       }
 
+      function stopIntroProgressSync() {
+        window.cancelAnimationFrame(introProgressFrame);
+        introProgressFrame = 0;
+      }
+
       function scheduleIntroFallback() {
         window.clearTimeout(introFallbackTimer);
         const configuredDelay = Number(WEDDING_CONFIG.intro.fallbackDelayMs);
@@ -2135,6 +2184,7 @@
 
       function handleIntroMediaError() {
         clearIntroSequenceTimers();
+        stopIntroProgressSync();
         if (introFinished) return;
         const intro = document.getElementById('intro');
         if (!intro) return;
@@ -2166,6 +2216,7 @@
 
       function finishIntro(reason = 'complete') {
         clearIntroSequenceTimers();
+        stopIntroProgressSync();
         const app = document.getElementById('invitation-app');
         document.removeEventListener('keydown', handleIntroKeydown);
         restoreInvitationAccess(app);
@@ -2209,6 +2260,7 @@
 
       function renderIntro() {
         clearIntroSequenceTimers();
+        stopIntroProgressSync();
         const app = document.getElementById('invitation-app');
         document.removeEventListener('keydown', handleIntroKeydown);
         if (WEDDING_CONFIG.sections.intro !== true) {
@@ -2297,10 +2349,25 @@
           intro.style.setProperty('--intro-progress', String(progress));
         };
 
+        const syncIntroProgressFrame = () => {
+          introProgressFrame = 0;
+          syncIntroProgress();
+          if (!video.paused && !video.ended && !introFinished) {
+            introProgressFrame = window.requestAnimationFrame(syncIntroProgressFrame);
+          }
+        };
+
+        const startIntroProgressSync = () => {
+          stopIntroProgressSync();
+          syncIntroProgress();
+          introProgressFrame = window.requestAnimationFrame(syncIntroProgressFrame);
+        };
+
         play.addEventListener('click', () => attemptIntroPlayback({ manual: true }));
-        video.addEventListener('timeupdate', syncIntroProgress);
         video.addEventListener('durationchange', syncIntroProgress);
+        video.addEventListener('pause', stopIntroProgressSync);
         video.addEventListener('ended', () => {
+          stopIntroProgressSync();
           intro.style.setProperty('--intro-progress', '1');
           finishIntro('ended');
         });
@@ -2347,6 +2414,7 @@
           intro.classList.remove('is-manual-playback');
           intro.classList.remove('has-media-error');
           intro.classList.add('is-video-playing');
+          startIntroProgressSync();
           play.hidden = true;
           if (status) {
             status.classList.remove('visually-hidden');
