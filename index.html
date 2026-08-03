@@ -8,7 +8,7 @@
   <script id="wedding-config">
     const WEDDING_CONFIG = Object.freeze({
       sections: { intro: true, hero: true, invitation: true, couple: true, schedule: true, story: true, gallery: true, location: true, transportation: true, notices: true, accounts: true, share: true, outro: true },
-      theme: { paper: '#effbfd', ink: '#244346', muted: '#6b8586', green: '#497a71', sky: '#cdedf4', softGreen: '#b8d8cb', maxWidth: '460px' },
+      theme: { ink: '#244346', muted: '#6b8586', green: '#497a71', sky: '#cdedf4', softGreen: '#b8d8cb', maxWidth: '460px' },
       intro: {
         video: './assets/video/intro.mp4',
         poster: './assets/images/intro-poster.jpg',
@@ -26,7 +26,18 @@
       },
       wedding: { iso: '2026-10-24T12:30:00+09:00', dateKey: '2026-10-24', displayDate: '2026. 10. 24. SAT', displayTime: '오후 12시 30분', venue: '아르베 웨딩', hall: '그랜드 홀 · 3층', address: '서울특별시 강남구 테헤란로 123', phone: '02-1234-5678' },
       messages: { hero: 'Happily Ever After', invitationTitle: '소중한 분들을 초대합니다', invitation: ['서로의 하루를 아끼며', '같은 곳을 바라보게 된 두 사람이', '이제 한 가족이 되려 합니다.', '', '저희의 새로운 시작을', '따뜻한 마음으로 축복해 주세요.'], outro: ['장담하건대, 세상이 다 겨울이어도', '우리 사랑은 늘 봄처럼 따뜻할 것입니다.'], signature: 'With love, GYUMIN & SARA' },
-      media: { hero: './assets/images/hero.jpg', map: './assets/images/map.jpg', gallery: Array.from({ length: 8 }, (_, index) => ({ src: `./assets/images/gallery-${String(index + 1).padStart(2, '0')}.jpg`, alt: `웨딩 사진 ${index + 1}` })) },
+      media: {
+        // 메인 이미지: assets/images 폴더에 hero.jpg 이름으로 넣으세요.
+        hero: './assets/images/hero.jpg',
+        // 약도 이미지: assets/images 폴더에 map.jpg 이름으로 넣으세요.
+        map: './assets/images/map.jpg',
+        // 갤러리 이미지: gallery-01.jpg부터 gallery-08.jpg까지 두 자리 번호로 넣으세요.
+        // 파일명이나 확장자를 바꾸면 아래 src 경로도 실제 파일에 맞게 수정하세요. 예: hero.png → './assets/images/hero.png'
+        gallery: Array.from({ length: 8 }, (_, index) => ({
+          src: `./assets/images/gallery-${String(index + 1).padStart(2, '0')}.jpg`,
+          alt: `웨딩 사진 ${index + 1}`,
+        })),
+      },
       story: [{ year: '2020', label: '첫 만남', title: '우연처럼 시작된 우리', body: '평범했던 하루가 서로를 만나 특별해졌습니다.' }, { year: '2022', label: '여행', title: '같은 풍경을 바라보며', body: '수많은 계절과 여행 속에서 서로의 가장 편안한 사람이 되었습니다.' }, { year: '2026', label: '약속', title: '평생을 함께하기로', body: '앞으로의 모든 날을 함께 걷기로 약속했습니다.' }],
       transportation: [{ title: '지하철', lines: ['2호선 역삼역 3번 출구에서 도보 5분'] }, { title: '버스', lines: ['간선 146, 341, 360', '지선 3412, 4312'] }, { title: '주차', lines: ['건물 지하 주차장 2시간 무료', '가급적 대중교통 이용을 부탁드립니다.'] }],
       notices: [{ eyebrow: 'PHOTO BOOTH', title: '포토부스 이용 안내', body: '예식 당일 포토부스가 준비됩니다. 환한 미소와 따뜻한 메시지를 남겨주세요.' }, { eyebrow: 'FLOWER', title: '화환은 정중히 사양합니다', body: '축하해 주시는 마음만 감사히 받겠습니다.' }],
@@ -38,7 +49,7 @@
   <style>
     :root {
       --page-width: 460px;
-      --paper: #effbfd;
+      --paper: #f2f8ff; /* 전체 배경색: 이 값만 변경하세요 */
       --ink: #244346;
       --muted: #6b8586;
       --green: #497a71;
@@ -365,14 +376,14 @@
     }
 
     .has-reveal-motion .reveal .section-header {
-      transform: translateY(36px);
-      transition-duration: 1100ms;
+      transform: translateY(52px);
+      transition-duration: 1600ms;
     }
 
     .has-reveal-motion .reveal .section-body {
-      transform: translateY(30px);
-      transition-duration: 1250ms;
-      transition-delay: 180ms;
+      transform: translateY(44px);
+      transition-duration: 1800ms;
+      transition-delay: 260ms;
     }
 
     .has-reveal-motion .reveal.is-visible .section-header,
@@ -451,8 +462,8 @@
     .hero-section .section-header {
       position: relative;
       z-index: 2;
-      margin: 0 0 -48px;
-      padding: 30px 14px 0;
+      margin: 0 0 32px;
+      padding: 30px 0 0;
       text-align: left;
     }
 
@@ -460,15 +471,15 @@
       max-width: 100%;
       margin: 0;
       font-family: 'Courgette', cursive;
-      font-size: clamp(1.75rem, 9vw, 2.6rem);
+      font-size: clamp(1.8rem, 10.5vw, 2.9rem);
       letter-spacing: 0;
       line-height: 0.95;
       white-space: nowrap;
     }
 
     .hero-media {
-      width: calc(100% - 34px);
-      margin-left: auto;
+      width: 100%;
+      margin-left: 0;
       aspect-ratio: 3 / 4.15;
     }
 
@@ -1219,6 +1230,7 @@
       let countdownTimer = 0;
       let galleryIndex = 0;
       let toastTimer = 0;
+      let revealMotionInitialized = false;
 
       function element(tag, className, text) {
         const node = document.createElement(tag);
@@ -1577,7 +1589,6 @@
       function applyTheme() {
         const root = document.documentElement;
         root.style.setProperty('--page-width', WEDDING_CONFIG.theme.maxWidth);
-        root.style.setProperty('--paper', WEDDING_CONFIG.theme.paper);
         root.style.setProperty('--ink', WEDDING_CONFIG.theme.ink);
         root.style.setProperty('--muted', WEDDING_CONFIG.theme.muted);
         root.style.setProperty('--green', WEDDING_CONFIG.theme.green);
@@ -1793,6 +1804,8 @@
       }
 
       function initRevealMotion() {
+        if (revealMotionInitialized) return;
+        revealMotionInitialized = true;
         const reveals = [...document.querySelectorAll('.reveal')];
         const reduceMotion = typeof window.matchMedia === 'function'
           && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1801,7 +1814,7 @@
           return;
         }
 
-        document.body.classList.add('has-reveal-motion');
+        void document.body.offsetWidth;
         const observer = new IntersectionObserver(entries => {
           entries.forEach(entry => {
             if (!entry.isIntersecting) return;
@@ -1896,6 +1909,7 @@
           window.clearTimeout(introRemovalTimer);
           intro.removeEventListener('transitionend', onTransitionEnd);
           intro.remove();
+          initRevealMotion();
         };
         const onTransitionEnd = event => {
           if (event.target === intro && event.propertyName === 'opacity') removeIntro();
@@ -2040,10 +2054,11 @@
       function init() {
         document.title = `${WEDDING_CONFIG.couple.groom.name} ♥ ${WEDDING_CONFIG.couple.bride.name} 결혼식에 초대합니다`;
         applyTheme();
+        document.body.classList.add('has-reveal-motion');
         renderSections();
         bindInteractions();
-        initRevealMotion();
         renderIntro();
+        if (!document.getElementById('intro')) initRevealMotion();
       }
 
       return { init, renderSections, finishIntro, openDialog, closeDialog, copyText };
