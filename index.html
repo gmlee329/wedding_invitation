@@ -1017,7 +1017,7 @@
       transform: translate(-50%, -50%) rotate(0deg) scale(.96);
     }
 
-    .gallery-stage[data-gallery-opening-phase='gathering'] .gallery-opening-card > .media-frame,
+    .gallery-stage[data-gallery-opening-phase='gathering'] .gallery-opening-card:not(.is-lead) > .media-frame,
     .gallery-stage[data-gallery-opening-phase='expanding'] .gallery-opening-card:not(.is-lead) > .media-frame,
     .gallery-stage[data-gallery-opening-phase='revealing'] .gallery-opening-card:not(.is-lead) > .media-frame {
       border-color: transparent;
@@ -1378,8 +1378,9 @@
       top: calc(max(12px, env(safe-area-inset-top)) + 22px);
       right: auto;
       left: 50%;
-      /*color: var(--gallery-control-color);*/
+      color: var(--gallery-control-color);
       background: rgb(240 240 240 / 35%);
+      backdrop-filter: none;
       transform: translate(-50%, -50%);
       transition: opacity 520ms ease;
     }
